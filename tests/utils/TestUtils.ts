@@ -1,5 +1,5 @@
 
-export class TestUtils {
+export default class TestUtils {
 
     public static getRandomName(): string {
         return this.firstnames[Math.floor(Math.random() * this.firstnames.length)] + " "
