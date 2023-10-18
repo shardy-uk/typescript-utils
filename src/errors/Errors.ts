@@ -97,8 +97,7 @@ export enum ErrorType {
     CredentialsError = 'CredentialsError',
     UserExists = 'UserExists',
     InvalidUserId = 'InvalidUserId',
-    DatabaseError = 'DatabaseError',
-    DefaultError = 'Error',
+    DatabaseError = 'DatabaseError'
 }
 
 // Error Factory Function
@@ -127,7 +126,7 @@ export function createError(type: ErrorType, message: string, parentError?: Erro
         case ErrorType.InvalidUserId:
             return new InvalidUserId(message, parentError);
         default:
-            return new Error(message);
+            return new ChainedError(message, parentError);
     }
 }
 

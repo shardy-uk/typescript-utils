@@ -1,5 +1,5 @@
 import PouchDB from 'pouchdb';
-import {GenericPouchDAO} from '../../../services/dao/GenericPouchDAO';
+import {GenericPouchDAO} from '../../src/dao/GenericPouchDAO';
 import {v4 as uuidv4} from 'uuid';
 import {TestDoc} from "./TestDoc";
 import memoryAdapter from 'pouchdb-adapter-memory';

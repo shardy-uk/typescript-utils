@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import {CredentialsError} from "./Errors";
+import {CredentialsError} from "../errors/Errors";
 
 export default class PasswordUtils {
     private static SALT_LENGTH = 16;
@@ -13,7 +13,7 @@ export default class PasswordUtils {
             const salt = crypto.randomBytes(this.SALT_LENGTH).toString(this.ENCODING);
             crypto.pbkdf2(password, salt, this.HASH_ITERATIONS, this.HASH_LENGTH, this.DIGEST, (err, derivedKey) => {
                 if (err) reject(new CredentialsError('Failed to hash the password.'));
-                resolve({ salt, hashedPassword: derivedKey.toString(this.ENCODING) });
+                resolve({salt, hashedPassword: derivedKey.toString(this.ENCODING)});
             });
         });
     }

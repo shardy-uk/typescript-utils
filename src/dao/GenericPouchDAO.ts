@@ -2,7 +2,7 @@ import {v4 as uuidv4} from 'uuid';
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import Joi from "joi";
-import {createError, ErrorType} from "../../utils/Errors";
+import {createError, ErrorType} from "../errors/Errors";
 import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);
@@ -27,7 +27,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * @returns {Promise<number>} A promise that resolves to the next sequence ID.
      */
     async getNextSequenceId(counterDocId: string): Promise<number> {
-        let counterDoc;
+        let counterDoc: { _id: string; seq: number; };
         try {
             counterDoc = await this.db.get(counterDocId);
         } catch (error: any) {
@@ -50,7 +50,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
             }
         }
 
-        (counterDoc as any).seq++;
+        counterDoc.seq++;
         try {
             await this.db.put(counterDoc);
         } catch (error: any) {
@@ -60,7 +60,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
                 throw error;
             }
         }
-        return (counterDoc as any).seq;
+        return counterDoc.seq;
     }
 
     /**
@@ -87,7 +87,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      */
     async getAll(): Promise<D[]> {
         try {
-            const results = await this.db.find({ selector: { entityType: this.entityType } });
+            const results = await this.db.find({selector: {entityType: this.entityType}});
             return results.docs as D[];
         } catch (error: any) {
             throw createError(ErrorType.DatabaseGetError, 'Error retrieving all documents in getAll', error);
@@ -134,7 +134,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
             });
             if (missingDocIds.length > 0) {
                 // noinspection ExceptionCaughtLocallyJS
-                throw createError(ErrorType.DatabaseGetError,`Error retrieving documents in getMany. Missing docIds: ${missingDocIds.join(", ")}`);
+                throw createError(ErrorType.DatabaseGetError, `Error retrieving documents in getMany. Missing docIds: ${missingDocIds.join(", ")}`);
             }
             return validDocs;
         } catch (error: any) {
@@ -252,7 +252,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
                 // noinspection ExceptionCaughtLocallyJS
                 throw createError(ErrorType.BulkSaveError, 'Bulk save failed for some documents: ' + JSON.stringify(failedDocs));
             } else {
-                return docsToSave.map((doc, index) => ({ ...doc, _id: successIds[index] })) as GenericPouchDoc[];
+                return docsToSave.map((doc, index) => ({...doc, _id: successIds[index]})) as GenericPouchDoc[];
             }
         } catch (error: any) {
             throw createError(ErrorType.BulkSaveError, 'Failed to save documents in bulk', error);

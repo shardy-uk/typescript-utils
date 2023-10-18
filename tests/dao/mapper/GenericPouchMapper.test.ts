@@ -1,6 +1,6 @@
-import {GenericPouchMapper} from "../../../../services/dao/mappers/GenericPouchMapper";
-import {GenericPouchDoc} from "../../../../services/dao/GenericPouchDAO";
-import {Entity} from "../../../../common/model/Entity";
+import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
+import {GenericPouchDoc} from "../../../src/dao/GenericPouchDAO";
+import {PouchEntity} from "../../../src/model/PouchEntity";
 
 describe('GenericPouchMapper', () => {
     describe('toDomain', () => {
@@ -23,7 +23,7 @@ describe('GenericPouchMapper', () => {
 
     describe('toDB', () => {
         it('should convert a domain model to a PouchDB document', () => {
-            const domainModel: Entity = {
+            const domainModel: PouchEntity = {
                 id: 'some-id',
                 revision: 'some-rev',
                 entityType: 'some-type',
