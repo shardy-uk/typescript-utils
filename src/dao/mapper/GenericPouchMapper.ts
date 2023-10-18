@@ -11,11 +11,11 @@ export class GenericPouchMapper {
      * @returns {PouchEntity} The converted domain model.
      */
     static toDomain(dbDoc: GenericPouchDoc): PouchEntity {
-        const {_id, _rev, entityType, appVersion} = dbDoc;
-        if (!_id || !_rev || !entityType || !appVersion) {
-            throw new Error(`Unable to map object with properties ID: ${_id} revision: ${_rev} entityType: ${entityType} appVersion: ${appVersion}`);
+        const {_id, _rev, entityType} = dbDoc;
+        if (!_id || !_rev || !entityType) {
+            throw new Error(`Unable to map object with properties ID: ${_id} revision: ${_rev} entityType: ${entityType}`);
         }
-        return {id: _id, revision: _rev, entityType: entityType, appVersion: appVersion};
+        return {id: _id, revision: _rev, entityType: entityType};
     }
 
     /**
@@ -27,7 +27,7 @@ export class GenericPouchMapper {
      * @returns {GenericPouchDoc} The converted PouchDB document.
      */
     static toDB(domainDoc: PouchEntity): GenericPouchDoc {
-        const {id, revision, entityType, appVersion} = domainDoc;
-        return {_id: id, _rev: revision, entityType: entityType, appVersion: appVersion};
+        const {id, revision, entityType} = domainDoc;
+        return {_id: id, _rev: revision, entityType: entityType};
     }
 }

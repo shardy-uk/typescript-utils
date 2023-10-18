@@ -13,7 +13,7 @@ describe('GenericPouchDAO', () => {
 
     beforeEach(() => {
         db = new PouchDB('testDB' + uuidv4(), {adapter: 'memory'});
-        genericDAO = new GenericPouchDAO(db, "Test|");
+        genericDAO = new GenericPouchDAO(db, "Test|", packageJson.version);
     });
 
     afterEach(async () => {

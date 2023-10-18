@@ -3,7 +3,6 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import Database = PouchDB.Database;
 import Joi from "joi";
-import packageJson from '../../package.json';
 import {createError, ErrorType} from "../errors/Errors";
 import {GenericDAO} from "./GenericDAO";
 import {StringUtils} from "../utils/StringUtils";
@@ -13,10 +12,12 @@ PouchDB.plugin(PouchDBFind);
 export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>, IDocTypeProvider {
     private readonly db: Database;
     private readonly entityType: string;
+    private readonly appVersion: string;
 
-    constructor(db: Database, entityType: string) {
+    constructor(db: Database, entityType: string, appVersion: string) {
         this.db = db || new PouchDB(process.env.DB_NAME!);
         this.entityType = entityType;
+        this.appVersion = appVersion;
     }
 
     getEntityType(): string {
@@ -301,7 +302,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
     protected populateDefaultFields(doc: GenericPouchDoc): GenericPouchDoc {
         doc._id = StringUtils.setIfEmpty(doc._id, this.entityType + uuidv4());
         doc.entityType = StringUtils.setIfEmpty(doc.entityType, this.entityType);
-        doc.appVersion = StringUtils.setIfEmpty(doc.appVersion, packageJson.version);
+        doc.appVersion = StringUtils.setIfEmpty(doc.appVersion, this.appVersion);
         return doc;
     }
 }
