@@ -7,17 +7,18 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "dependencies": {
     "@types/pouchdb": "^6.4.0",
     "@types/pouchdb-find": "^7.3.1",
     "@types/uuid": "^9.0.5",
     "joi": "^17.11.0",
-    "sequelize": "^6.33.0",
-    "sqlite": "^5.0.1",
     "pouchdb": "^8.0.1",
-    "pouchdb-find": "^8.0.1"
+    "pouchdb-find": "^8.0.1",
+    "sequelize": "^6.33.0",
+    "sqlite": "^5.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.6",
