@@ -3,6 +3,7 @@ import memoryAdapter from 'pouchdb-adapter-memory';
 import {GenericPouchDAO} from '../../src/dao/GenericPouchDAO';
 import {v4 as uuidv4} from 'uuid';
 import {TestDoc} from "./TestDoc";
+import packageJson from '../../package.json';
 
 PouchDB.plugin(memoryAdapter);
 
@@ -29,26 +30,29 @@ describe('GenericPouchDAO', () => {
         expect(retrievedDoc._id).toContain("Test|");
         expect(retrievedDoc.entityType).toBe("Test|");
         expect(retrievedDoc._id).toBe(savedEntity._id);
+        expect(retrievedDoc.appVersion).toBe("0.0.1-alpha");
         // @ts-ignore
         expect(retrievedDoc.value).toBe(doc.value);
     });
 
     it('updates a document', async () => {
-        const payload: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value', appVersion: '0.0.1-alpha',};
+        const payload: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value'};
         const doc = await genericDAO.create(payload);
         if (!doc._id) {
             fail('doc._id should not be null or undefined');
         }
-        const updatedDoc = {...doc, value: 'updated'};
+        expect(doc.appVersion).toBe(packageJson.version);
+        const updatedDoc = {...doc, value: 'updated', appVersion: '0.0.1-alpha',};
         await genericDAO.update(updatedDoc);
 
         const retrievedDoc = await genericDAO.getOne(doc._id);
+        expect(retrievedDoc.appVersion).toBe('0.0.1-alpha');
         // @ts-ignore
         expect(retrievedDoc.value).toBe(updatedDoc.value);
     });
 
     it('deletes a document', async () => {
-        const doc: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value', appVersion: '0.0.1-alpha',};
+        const doc: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value'};
         const savedEntity = await genericDAO.create(doc);
         if (!savedEntity._id) {
             fail('doc._id should not be null or undefined');
@@ -63,9 +67,9 @@ describe('GenericPouchDAO', () => {
 
     it('retrieves multiple documents with getMany', async () => {
         // Create a few test documents
-        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1', appVersion: '0.0.1-alpha',};
-        const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2', appVersion: '0.0.1-alpha',};
-        const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3', appVersion: '0.0.1-alpha',};
+        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1'};
+        const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2'};
+        const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3'};
 
         const id1 = await genericDAO.create(doc1);
         const id2 = await genericDAO.create(doc2);
@@ -89,7 +93,7 @@ describe('GenericPouchDAO', () => {
 
 
     it('finds by field', async () => {
-        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value', appVersion: '0.0.1-alpha',};
+        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value'};
         const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Different Value', appVersion: '0.0.1-alpha',};
         await genericDAO.create(doc1);
         await genericDAO.create(doc2);
@@ -126,8 +130,8 @@ describe('GenericPouchDAO', () => {
 
         it('saves multiple documents in bulk', async () => {
             // Create a few test documents
-            const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1', appVersion: '0.0.1-alpha',};
-            const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2', appVersion: '0.0.1-alpha',};
+            const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1'};
+            const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2'};
             const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3', appVersion: '0.0.1-alpha',};
 
             // Perform the bulk save operation
@@ -153,6 +157,12 @@ describe('GenericPouchDAO', () => {
             expect(values).toContain('Some Value 1');
             expect(values).toContain('Some Value 2');
             expect(values).toContain('Some Value 3');
+
+
+            // Validate that the docs in the database match those we tried to save
+            const versions = allDocs.map(doc => doc.appVersion);
+            expect(versions).toContain(packageJson.version);
+            expect(versions).toContain('0.0.1-alpha');
         });
     });
 

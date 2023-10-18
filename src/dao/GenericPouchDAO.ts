@@ -3,7 +3,7 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import Database = PouchDB.Database;
 import Joi from "joi";
-const packageJson = require('../../package.json');
+import packageJson from '../../package.json';
 import {createError, ErrorType} from "../errors/Errors";
 import {GenericDAO} from "./GenericDAO";
 import {StringUtils} from "../utils/StringUtils";
@@ -332,7 +332,7 @@ export interface GenericPouchDoc {
     _id?: string;
     _rev?: string;
     entityType?: string;
-    appVersion: string;
+    appVersion?: string;
     [key: string]: any;
 }
 

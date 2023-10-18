@@ -12,8 +12,8 @@ export class GenericPouchMapper {
      */
     static toDomain(dbDoc: GenericPouchDoc): PouchEntity {
         const {_id, _rev, entityType, appVersion} = dbDoc;
-        if (!_id || !_rev || !entityType) {
-            throw new Error(`Unable to map object with properties ID: ${_id} revision: ${_rev} entityType: ${entityType}`);
+        if (!_id || !_rev || !entityType || !appVersion) {
+            throw new Error(`Unable to map object with properties ID: ${_id} revision: ${_rev} entityType: ${entityType} appVersion: ${appVersion}`);
         }
         return {id: _id, revision: _rev, entityType: entityType, appVersion: appVersion};
     }
