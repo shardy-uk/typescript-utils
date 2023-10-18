@@ -1,5 +1,28 @@
 
 export class TestUtils {
+
+    public static getRandomName(): string {
+        return this.firstnames[Math.floor(Math.random() * this.firstnames.length)] + " "
+            + this.surnames[Math.floor(Math.random() * this.surnames.length)];
+    }
+
+    public static getRandomWords(count: number = 1): string {
+        return Array.from({length: count}, () =>
+            this.randomWordsArray[Math.floor(Math.random() * this.randomWordsArray.length)]).join(' ');
+    }
+
+    public static generateRandomEmail(): string {
+        return `${this.getRandomName().replace(" ", ".")}@${this.domainNames[Math.floor(Math.random() * this.domainNames.length)]}`;
+    }
+
+    public static getInitials(twoWordString: string): string {
+        const words = twoWordString.split(' ');
+        if (words.length !== 2) {
+            return 'Input string should contain exactly 2 words';
+        }
+        return words.map(word => word[0]).join('');
+    }
+
     public static firstnames = [
         "Emma", "Liam", "Olivia", "Noah", "Ava", "Isabella", "Sophia", "Jackson",
         "Aiden", "Lucas", "Matthew", "Ella", "Amelia", "Logan", "Mia", "Oliver",
