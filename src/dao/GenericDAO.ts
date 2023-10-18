@@ -1,4 +1,4 @@
-interface GenericDAO<D> {
+export interface GenericDAO<D> {
     create(doc: D): Promise<D>;
 
     getOne(id: string): Promise<D>;
