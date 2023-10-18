@@ -20,7 +20,7 @@ describe('GenericPouchDAO', () => {
     });
 
     it('creates and retrieves a document', async () => {
-        const doc: TestDoc = {_id: "", entityType: "", name: "SomeThing", value: 'Some Value'};
+        const doc: TestDoc = {_id: undefined, entityType: undefined, name: "SomeThing", value: 'Some Value', appVersion: '0.0.1-alpha',};
         const savedEntity = await genericDAO.create(doc);
         if (!savedEntity._id) {
             fail('doc._id should not be null or undefined');
@@ -34,7 +34,7 @@ describe('GenericPouchDAO', () => {
     });
 
     it('updates a document', async () => {
-        const payload: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value'};
+        const payload: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value', appVersion: '0.0.1-alpha',};
         const doc = await genericDAO.create(payload);
         if (!doc._id) {
             fail('doc._id should not be null or undefined');
@@ -48,7 +48,7 @@ describe('GenericPouchDAO', () => {
     });
 
     it('deletes a document', async () => {
-        const doc: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value'};
+        const doc: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value', appVersion: '0.0.1-alpha',};
         const savedEntity = await genericDAO.create(doc);
         if (!savedEntity._id) {
             fail('doc._id should not be null or undefined');
@@ -63,9 +63,9 @@ describe('GenericPouchDAO', () => {
 
     it('retrieves multiple documents with getMany', async () => {
         // Create a few test documents
-        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1'};
-        const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2'};
-        const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3'};
+        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1', appVersion: '0.0.1-alpha',};
+        const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2', appVersion: '0.0.1-alpha',};
+        const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3', appVersion: '0.0.1-alpha',};
 
         const id1 = await genericDAO.create(doc1);
         const id2 = await genericDAO.create(doc2);
@@ -89,8 +89,8 @@ describe('GenericPouchDAO', () => {
 
 
     it('finds by field', async () => {
-        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value'};
-        const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Different Value'};
+        const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value', appVersion: '0.0.1-alpha',};
+        const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Different Value', appVersion: '0.0.1-alpha',};
         await genericDAO.create(doc1);
         await genericDAO.create(doc2);
 
@@ -126,9 +126,9 @@ describe('GenericPouchDAO', () => {
 
         it('saves multiple documents in bulk', async () => {
             // Create a few test documents
-            const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1'};
-            const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2'};
-            const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3'};
+            const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1', appVersion: '0.0.1-alpha',};
+            const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2', appVersion: '0.0.1-alpha',};
+            const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3', appVersion: '0.0.1-alpha',};
 
             // Perform the bulk save operation
             const bulkSaveResult = await genericDAO.bulkSave([doc1, doc2, doc3]);

@@ -9,6 +9,7 @@ describe('GenericPouchMapper', () => {
                 _id: 'some-id',
                 _rev: 'some-rev',
                 entityType: 'some-type',
+                appVersion: '0.0.1-alpha',
             };
 
             const domainModel = GenericPouchMapper.toDomain(pouchDoc);
@@ -16,7 +17,8 @@ describe('GenericPouchMapper', () => {
             expect(domainModel).toEqual({
                 id: 'some-id',
                 revision: 'some-rev',
-                entityType: 'some-type'
+                entityType: 'some-type',
+                appVersion: '0.0.1-alpha',
             });
         });
     });
@@ -27,6 +29,7 @@ describe('GenericPouchMapper', () => {
                 id: 'some-id',
                 revision: 'some-rev',
                 entityType: 'some-type',
+                appVersion: '0.0.1-alpha',
             };
 
             const pouchDoc = GenericPouchMapper.toDB(domainModel);
@@ -35,6 +38,7 @@ describe('GenericPouchMapper', () => {
                 _id: 'some-id',
                 _rev: 'some-rev',
                 entityType: 'some-type',
+                appVersion: '0.0.1-alpha',
             });
         });
     });

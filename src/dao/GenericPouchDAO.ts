@@ -3,8 +3,10 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import Database = PouchDB.Database;
 import Joi from "joi";
+const packageJson = require('../../package.json');
 import {createError, ErrorType} from "../errors/Errors";
 import {GenericDAO} from "./GenericDAO";
+import {StringUtils} from "../utils/StringUtils";
 
 PouchDB.plugin(PouchDBFind);
 
@@ -152,7 +154,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      */
     async create(doc: D): Promise<D> {
         try {
-            const docWithId = this.populateIdAndEntityType(doc);
+            const docWithId = this.populateDefaultFields(doc);
             const response = await this.db.put(docWithId);
             if (response && response.ok) {
                 return this.getOne(response.id);
@@ -243,7 +245,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      */
     async bulkSave(docs: GenericPouchDoc[]): Promise<GenericPouchDoc[]> {
         try {
-            const docsToSave = docs.map(doc => this.populateIdAndEntityType(doc));
+            const docsToSave = docs.map(doc => this.populateDefaultFields(doc));
             const response = await this.db.bulkDocs(docsToSave);
 
             const failedDocs = response.filter((doc: any) => doc.error === true);
@@ -296,13 +298,10 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * const populatedUserDoc = populateIdAndEntityType(userDoc);
      * // populatedUserDoc will now have new _id and entityType fields based on the type of DAO that is doing the creation, override if mixing document types in the save.
      */
-    protected populateIdAndEntityType(doc: GenericPouchDoc): GenericPouchDoc {
-        if (!doc._id || doc.id === "") {
-            doc._id = this.entityType + uuidv4();
-        }
-        if (!doc.entityType || doc.entityType === "") {
-            doc.entityType = this.entityType;
-        }
+    protected populateDefaultFields(doc: GenericPouchDoc): GenericPouchDoc {
+        doc._id = StringUtils.setIfEmpty(doc._id, this.entityType + uuidv4());
+        doc.entityType = StringUtils.setIfEmpty(doc.entityType, this.entityType);
+        doc.appVersion = StringUtils.setIfEmpty(doc.appVersion, packageJson.version);
         return doc;
     }
 }
@@ -311,7 +310,7 @@ export abstract class ValidatingPouchDAO<D extends GenericPouchDoc> extends Gene
     abstract getSchema(): Joi.ObjectSchema;
 
     async create(doc: D): Promise<D> {
-        const docWithId = this.populateIdAndEntityType(doc);
+        const docWithId = this.populateDefaultFields(doc);
         const validation = this.getSchema().validate(docWithId);
         if (validation.error) {
             throw createError(ErrorType.ValidationError, `Validation failed: ${validation.error.details.map(d => d.message).join(', ')}`);
@@ -333,7 +332,7 @@ export interface GenericPouchDoc {
     _id?: string;
     _rev?: string;
     entityType?: string;
-
+    appVersion: string;
     [key: string]: any;
 }
 
