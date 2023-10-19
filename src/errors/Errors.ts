@@ -1,88 +1,61 @@
+// Base class for all chained errors
 export class ChainedError extends Error {
     public parentError?: Error;
 
-    constructor(message: string, parentError?: Error) {
+    constructor(message: string, parentError?: Error, name: string = "ChainedError") {
         super(parentError ? `${message} | Caused by: ${parentError.message}` : message);
         this.parentError = parentError;
-        // Set the prototype explicitly (TypeScript requirement)
-        Object.setPrototypeOf(this, ChainedError.prototype);
-
+        Object.setPrototypeOf(this, new.target.prototype);
+        this.name = name;
         if (this.parentError) {
-            this.stack = `${this.stack}\nCaused by: \n${this.parentError.stack}`;
+            this.stack = `${this.stack}\n### Caused by: ###\n${this.parentError.stack}`;
         }
     }
 }
 
-export class CredentialsError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        // Set the prototype explicitly (TypeScript requirement)
-        Object.setPrototypeOf(this, CredentialsError.prototype);
-    }
+// Derived error classes
+export class VerificationError extends ChainedError {
+    constructor(message: string, parentError?: Error) { super(message, parentError, "VerificationError"); }
+}
+
+export class HashingError extends ChainedError {
+    constructor(message: string, parentError?: Error) { super(message, parentError, "HashingError"); }
 }
 
 export class BulkSaveError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        // Set the prototype explicitly (TypeScript requirement)
-        Object.setPrototypeOf(this, BulkSaveError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "BulkSaveError"); }
 }
 
 export class UserExists extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, UserExists.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "UserExists"); }
 }
 
 export class InvalidUserId extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, InvalidUserId.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "InvalidUserId"); }
 }
 
 export class DatabaseGetError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, DatabaseGetError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseGetError"); }
 }
 
 export class DatabaseUpdateError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, DatabaseUpdateError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseUpdateError"); }
 }
 
 export class DatabaseDeleteError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, DatabaseDeleteError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseDeleteError"); }
 }
 
 export class DatabaseCreateError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, DatabaseCreateError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseCreateError"); }
 }
 
 export class DatabaseError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, DatabaseError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseError"); }
 }
 
 export class ValidationError extends ChainedError {
-    constructor(message: string, parentError?: Error) {
-        super(message, parentError);
-        Object.setPrototypeOf(this, ValidationError.prototype);
-    }
+    constructor(message: string, parentError?: Error) { super(message, parentError, "ValidationError"); }
 }
 
 // Enum for Error Types
@@ -94,47 +67,43 @@ export enum ErrorType {
     DatabaseDeleteError = 'DatabaseDeleteError',
     ValidationError = 'ValidationError',
     BulkSaveError = 'BulkSaveError',
-    CredentialsError = 'CredentialsError',
+    VerificationError = 'VerificationError',
+    HashingError = 'HashingError',
     UserExists = 'UserExists',
     InvalidUserId = 'InvalidUserId',
     DatabaseError = 'DatabaseError'
 }
 
+// Error Class Map
+const ErrorClassMap: Record<ErrorType, typeof ChainedError> = {
+    [ErrorType.ChainedError]: ChainedError,
+    [ErrorType.DatabaseGetError]: DatabaseGetError,
+    [ErrorType.DatabaseCreateError]: DatabaseCreateError,
+    [ErrorType.DatabaseUpdateError]: DatabaseUpdateError,
+    [ErrorType.DatabaseDeleteError]: DatabaseDeleteError,
+    [ErrorType.VerificationError]: VerificationError,
+    [ErrorType.ValidationError]: ValidationError,
+    [ErrorType.BulkSaveError]: BulkSaveError,
+    [ErrorType.HashingError]: HashingError,
+    [ErrorType.UserExists]: UserExists,
+    [ErrorType.InvalidUserId]: InvalidUserId,
+    [ErrorType.DatabaseError]: DatabaseError
+};
+
 // Error Factory Function
 export function createError(type: ErrorType, message: string, parentError?: Error): Error {
-    switch (type) {
-        case ErrorType.ChainedError:
-            return new ChainedError(message, parentError);
-        case ErrorType.DatabaseGetError:
-            return new DatabaseGetError(message, parentError);
-        case ErrorType.DatabaseCreateError:
-            return new DatabaseCreateError(message, parentError);
-        case ErrorType.DatabaseUpdateError:
-            return new DatabaseUpdateError(message, parentError);
-        case ErrorType.DatabaseDeleteError:
-            return new DatabaseDeleteError(message, parentError);
-        case ErrorType.ValidationError:
-            return new ValidationError(message, parentError);
-        case ErrorType.DatabaseError:
-            return new DatabaseError(message, parentError);
-        case ErrorType.BulkSaveError:
-            return new BulkSaveError(message, parentError);
-        case ErrorType.CredentialsError:
-            return new CredentialsError(message, parentError);
-        case ErrorType.UserExists:
-            return new UserExists(message, parentError);
-        case ErrorType.InvalidUserId:
-            return new InvalidUserId(message, parentError);
-        default:
-            return new ChainedError(message, parentError);
-    }
+    const ErrorClass = ErrorClassMap[type] || ChainedError;
+    return new ErrorClass(message, parentError);
 }
 
 // Utility Function for Error Handling
 export async function handleErrors<T>(asyncFunction: () => Promise<T>, message: string, errorType: ErrorType): Promise<T> {
     try {
         return await asyncFunction();
-    } catch (originalError: any) {
-        throw createError(errorType, message, originalError);
+    } catch (originalError: unknown) {
+        if (originalError instanceof Error) {
+            throw createError(errorType, message, originalError);
+        }
+        throw originalError;
     }
 }

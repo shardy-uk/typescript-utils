@@ -1,23 +1,20 @@
 import {v4 as uuidv4} from 'uuid';
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
-import Database = PouchDB.Database;
 import Joi from "joi";
 import {createError, ErrorType} from "../errors/Errors";
 import {GenericDAO} from "./GenericDAO";
 import {StringUtils} from "../utils/StringUtils";
+import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);
 
 export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>, IDocTypeProvider {
-    private readonly db: Database;
-    private readonly entityType: string;
-    private readonly appVersion: string;
-
-    constructor(db: Database, entityType: string, appVersion: string) {
-        this.db = db || new PouchDB(process.env.DB_NAME!);
-        this.entityType = entityType;
-        this.appVersion = appVersion;
+    constructor(
+        private readonly db: Database = new PouchDB(process.env.DB_NAME!),
+        private readonly entityType: string,
+        private readonly appVersion: string
+    ) {
     }
 
     getEntityType(): string {
@@ -28,43 +25,43 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * Gets the next sequence ID from a counter document.
      * @async
      * @param {string} counterDocId - The counter document ID.
+     * @param {number} maxRetries - The number of attempted retries in a race condition - defaults to 200
      * @returns {Promise<number>} A promise that resolves to the next sequence ID.
      */
-    async getNextSequenceId(counterDocId: string): Promise<number> {
+    async getNextSequenceId(counterDocId: string, maxRetries: number = 200): Promise<number> {
         let counterDoc: { _id: string; seq: number; };
-        try {
-            counterDoc = await this.db.get(counterDocId);
-        } catch (error: any) {
-            if (error.name === 'not_found') {
-                counterDoc = {
-                    _id: counterDocId,
-                    seq: 0,
-                };
-                try {
-                    await this.db.put(counterDoc);
-                } catch (error: any) {
-                    if (error.name === 'conflict') {
-                        return this.getNextSequenceId(counterDocId);
-                    } else {
-                        throw error;
+
+        for (let retries = 0; retries < maxRetries; retries++) {
+            try {
+                counterDoc = await this.db.get(counterDocId);
+            } catch (error: any) {
+                if (error.name === 'not_found') {
+                    counterDoc = {_id: counterDocId, seq: 0};
+                    try {
+                        await this.db.put(counterDoc);
+                        continue;
+                    } catch (error: any) {
+                        if (error.name === 'conflict') {
+                            continue;  // Retry on conflict
+                        }
+                        throw createError(ErrorType.DatabaseCreateError, `Failed to create counter doc ${counterDocId}`, error);
                     }
                 }
-            } else {
-                throw error;
+                throw createError(ErrorType.DatabaseGetError, `Failed to get counter doc ${counterDocId}`, error);
+            }
+
+            counterDoc.seq++;
+            try {
+                await this.db.put(counterDoc);
+                return counterDoc.seq;
+            } catch (error: any) {
+                if (error.name !== 'conflict') {
+                    throw createError(ErrorType.DatabaseUpdateError, `Failed to update counter doc ${counterDocId}`, error);
+                }
             }
         }
 
-        counterDoc.seq++;
-        try {
-            await this.db.put(counterDoc);
-        } catch (error: any) {
-            if (error.name === 'conflict') {
-                return this.getNextSequenceId(counterDocId);
-            } else {
-                throw error;
-            }
-        }
-        return counterDoc.seq;
+        throw createError(ErrorType.DatabaseError, `Exceeded max retries (${maxRetries}) while trying to get next sequence ID for ${counterDocId}`);
     }
 
     /**
@@ -334,6 +331,7 @@ export interface GenericPouchDoc {
     _rev?: string;
     entityType?: string;
     appVersion?: string;
+
     [key: string]: any;
 }
 

@@ -166,4 +166,22 @@ describe('GenericPouchDAO', () => {
         });
     });
 
+    test('fetches and increments a sequence counter without duplicates', async () => {
+        const NUM_CONCURRENT_CALLS = 50;
+        const counterDocId = 'counter';
+
+        // Start NUM_CONCURRENT_CALLS number of promises for getNextSequenceId() method
+        const promises = Array.from({length: NUM_CONCURRENT_CALLS}).map(() => genericDAO.getNextSequenceId(counterDocId));
+
+        // Execute all promises concurrently
+        const sequenceNumbers = await Promise.all(promises);
+
+        // Expect sequenceNumbers to contain unique numbers from 1 to NUM_CONCURRENT_CALLS
+        const uniqueSequenceNumbers = [...new Set(sequenceNumbers)];
+        expect(sequenceNumbers.length).toBe(uniqueSequenceNumbers.length);
+
+        // We could also check if the set of sequence numbers matches the expected set
+        const expectedSet = new Set(Array.from({length: NUM_CONCURRENT_CALLS}, (_, i) => i + 1));
+        expect(new Set(sequenceNumbers)).toEqual(expectedSet);
+    }, 10000);
 });
