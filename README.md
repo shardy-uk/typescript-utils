@@ -1,7 +1,5 @@
 # Typescript Utils
-
-## Table of Contents
-1. [DAO](#dao)
+___
 ## DAO
 
 The DAO (Data Access Object) layer is responsible for abstracting the interaction with the data source. In this project, the DAO layer is implemented using PouchDB.
@@ -79,6 +77,7 @@ Defines a method for retrieving the entity type.
 
 - `getEntityType(): string`: Returns the entity type.
 
+___
 
 ## Errors Module
 
@@ -114,6 +113,8 @@ This enum lists all available error types.
 ### Utility Function for Error Handling
 - **handleErrors**: A utility function for handling errors in async functions.
 
+___
+
 ## Model Module
 
 ### Entity
@@ -129,6 +130,8 @@ Utility class for password hashing and verification.
 
 - **hashPassword(password)**: Hashes a password and returns the salt and hashed password.
 - **verifyPassword(storedHash, storedSalt, passwordAttempt)**: Verifies a password against a stored hash and salt.
+
+___
 
 ## Utils Module
 
