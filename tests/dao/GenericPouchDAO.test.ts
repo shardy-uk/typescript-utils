@@ -2,6 +2,7 @@ import PouchDB from 'pouchdb';
 import memoryAdapter from 'pouchdb-adapter-memory';
 import {v4 as uuidv4} from 'uuid';
 import packageJson from '../../package.json';
+import {GenericDAO} from '../../src/dao/GenericDAO';
 import {GenericPouchDAO} from '../../src/dao/GenericPouchDAO';
 import {TestDoc} from "./TestDoc";
 
@@ -9,7 +10,7 @@ PouchDB.plugin(memoryAdapter);
 
 describe('GenericPouchDAO', () => {
     let db: PouchDB.Database;
-    let genericDAO: GenericPouchDAO<TestDoc>;
+    let genericDAO: GenericDAO<TestDoc>;
 
     beforeEach(() => {
         db = new PouchDB('testDB' + uuidv4(), {adapter: 'memory'});
@@ -123,19 +124,17 @@ describe('GenericPouchDAO', () => {
         expect(new Set(sequenceNumbers)).toEqual(expectedSet);
     });
 
-    // ... (existing import statements and setup code)
-
     describe('GenericPouchDAO', () => {
-        // ... (existing test cases)
 
         it('saves multiple documents in bulk', async () => {
+            const pouchDAO = genericDAO as GenericPouchDAO<TestDoc>;
             // Create a few test documents
             const doc1: TestDoc = {_id: "", entityType: "", name: 'test1', value: 'Some Value 1'};
             const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2'};
             const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3', appVersion: '0.0.1-alpha',};
 
             // Perform the bulk save operation
-            const bulkSaveResult = await genericDAO.bulkSave([doc1, doc2, doc3]);
+            const bulkSaveResult = await pouchDAO.bulkSave([doc1, doc2, doc3]);
 
             // Validate that the result of the bulk save contains all the docs
             expect(bulkSaveResult.length).toBe(3);
@@ -147,7 +146,7 @@ describe('GenericPouchDAO', () => {
             });
 
             // Fetch all documents from the database to validate
-            const allDocs = await genericDAO.getAll();
+            const allDocs = await pouchDAO.getAll();
 
             // Validate the number of docs saved in the database
             expect(allDocs.length).toBe(3);
