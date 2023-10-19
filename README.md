@@ -1,5 +1,27 @@
-# Typescript Utils
+# TypeScript Utilities for CRUD Applications
+
+This library serves as a comprehensive toolkit for building CRUD (Create, Read, Update, Delete) applications in TypeScript. It provides a range of utilities designed to accelerate the development process, allowing you to focus on the unique aspects of your application while the boilerplate code is efficiently handled.
+
+## Overview
+
+The library is modular, organized into distinct layers and functionalities:
+
+- **DAO (Data Access Object)**: Base implementations for generic data access operations, offering both a standard interface (`GenericDAO`) and a PouchDB-specific implementation (`GenericPouchDAO`).
+  
+- **Mappers**: Utility for mapping between datastore and domain models, facilitating data transformation.
+
+- **Errors**: A robust error-handling module that includes custom error classes, an error type enumeration, and utility functions for error creation and handling.
+
+- **Model**: The starting point for crafting domain models (`Entity` and `PouchEntity`), providing a consistent structure for your application's data.
+
+- **Password Utilities**: Helper functions for hashing and verifying passwords, encapsulated in the `PasswordUtils` class.
+
+- **String Utilities**: A collection of string manipulation functions, ranging from capitalization to email validation.
+
+With these foundational elements, you can extend and adapt the library to fit the specific requirements of your CRUD application, whether you're building DTOs (Data Transfer Objects), domain models, or implementing other common operations.
+
 ___
+
 ## DAO
 
 The DAO (Data Access Object) layer is responsible for abstracting the interaction with the data source. In this project, the DAO layer is implemented using PouchDB.
@@ -122,6 +144,8 @@ The starting point for a domain model. It has a single field `id`.
 
 ### PouchEntity
 Extends `Entity` and adds `revision` and `entityType` fields.
+
+___
 
 ## Password Module
 
