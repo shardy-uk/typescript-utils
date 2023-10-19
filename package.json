@@ -2,7 +2,7 @@
   "name": "typescript-utils",
   "version": "1.0.0",
   "private": true,
-  "description": "Library of Typescript utilities for common tasks. Such as DAOs, Error Handling, Passowrd Hashing, etc.",
+  "description": "Library of Typescript utilities for common tasks. Such as DAOs, Error Handling, Password Hashing, etc.",
   "directories": {
     "test": "tests"
   },
@@ -17,8 +17,8 @@
     "joi": "^17.11.0",
     "pouchdb": "^8.0.1",
     "pouchdb-find": "^8.0.1",
-    "sequelize": "^6.33.0",
-    "sqlite": "^5.0.1"
+    "sqlite": "^5.0.1",
+    "typeorm": "^0.3.17"
   },
   "devDependencies": {
     "@types/jest": "^29.5.6",

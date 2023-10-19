@@ -3,6 +3,7 @@ import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
 import {v4 as uuidv4} from 'uuid';
 import {createError, ErrorType} from "../errors/Errors";
+import {DateUtils} from "../utils/DateUtils";
 import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import Database = PouchDB.Database;
@@ -177,7 +178,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
         }
         try {
             const existingDoc: GenericPouchDoc = await this.db.get(doc._id);
-            const updatedDoc = {...existingDoc, ...doc, _rev: existingDoc._rev};
+            const updatedDoc = {...existingDoc, ...doc, _rev: existingDoc._rev, updatedDate: DateUtils.nowISO()};
             await this.db.put(updatedDoc);
             return this.getOne(doc._id);
         } catch (error: any) {
@@ -220,7 +221,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
             const existingDoc = await this.db.get(docId);
             return (await this.db.remove(existingDoc)).rev;
         } catch (error: any) {
-            throw createError(ErrorType.DatabaseDeleteError, 'Error deleting document', error);
+            throw createError(ErrorType.DatabaseDeleteError, `Error deleting document: ${docId}`, error);
         }
     }
 
@@ -300,6 +301,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
         doc._id = StringUtils.setIfEmpty(doc._id, this.entityType + uuidv4());
         doc.entityType = StringUtils.setIfEmpty(doc.entityType, this.entityType);
         doc.appVersion = StringUtils.setIfEmpty(doc.appVersion, this.appVersion);
+        doc.createdDate = DateUtils.nowISO();
         return doc;
     }
 }
@@ -331,6 +333,8 @@ export interface GenericPouchDoc {
     _rev?: string;
     entityType?: string;
     appVersion?: string;
+    createdDate?: string;
+    updatedDate?: string;
 
     [key: string]: any;
 }
@@ -344,4 +348,3 @@ interface AllDocsResponse<T> {
 export interface IDocTypeProvider {
     getEntityType(): string;
 }
-
