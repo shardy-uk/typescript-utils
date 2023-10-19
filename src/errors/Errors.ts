@@ -15,47 +15,69 @@ export class ChainedError extends Error {
 
 // Derived error classes
 export class VerificationError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "VerificationError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "VerificationError");
+    }
 }
 
 export class HashingError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "HashingError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "HashingError");
+    }
 }
 
 export class BulkSaveError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "BulkSaveError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "BulkSaveError");
+    }
 }
 
 export class UserExists extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "UserExists"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "UserExists");
+    }
 }
 
 export class InvalidUserId extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "InvalidUserId"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "InvalidUserId");
+    }
 }
 
 export class DatabaseGetError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseGetError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "DatabaseGetError");
+    }
 }
 
 export class DatabaseUpdateError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseUpdateError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "DatabaseUpdateError");
+    }
 }
 
 export class DatabaseDeleteError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseDeleteError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "DatabaseDeleteError");
+    }
 }
 
 export class DatabaseCreateError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseCreateError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "DatabaseCreateError");
+    }
 }
 
 export class DatabaseError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "DatabaseError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "DatabaseError");
+    }
 }
 
 export class ValidationError extends ChainedError {
-    constructor(message: string, parentError?: Error) { super(message, parentError, "ValidationError"); }
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "ValidationError");
+    }
 }
 
 // Enum for Error Types

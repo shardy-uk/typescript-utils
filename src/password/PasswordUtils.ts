@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import util from 'util';
-import { HashingError, VerificationError } from '../errors/Errors';  // Import or define these specific errors
+import {HashingError, VerificationError} from '../errors/Errors'; // Import or define these specific errors
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
@@ -15,7 +15,7 @@ export default class PasswordUtils {
         try {
             const salt = crypto.randomBytes(this.SALT_LENGTH).toString(this.ENCODING);
             const derivedKey = await pbkdf2(password, salt, this.HASH_ITERATIONS, this.HASH_LENGTH, this.DIGEST);
-            return { salt, hashedPassword: derivedKey.toString(this.ENCODING) };
+            return {salt, hashedPassword: derivedKey.toString(this.ENCODING)};
         } catch (error) {
             throw new HashingError('Failed to hash the password.');
         }
