@@ -1,4 +1,4 @@
-import { StringUtils } from '../../src/utils/StringUtils';  // Change the import path to wherever your StringUtils class resides.
+import {StringUtils} from '../../src/utils/StringUtils';
 
 describe('StringUtils', () => {
     it('should capitalize the first letter of a string', () => {
