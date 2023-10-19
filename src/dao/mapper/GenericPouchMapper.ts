@@ -1,5 +1,5 @@
-import {GenericPouchDoc} from "../GenericPouchDAO";
 import {PouchEntity} from "../../model/PouchEntity";
+import {GenericPouchDoc} from "../GenericPouchDAO";
 
 export class GenericPouchMapper {
     /**

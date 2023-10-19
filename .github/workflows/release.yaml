@@ -10,23 +10,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Use Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '18'
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
 
-    - name: Install Dependencies
-      run: npm install
+      - name: Install Dependencies
+        run: npm install
 
-    - name: Build
-      run: npm run build  # Assumes you have a "build" script in your package.json
+      - name: Build
+        run: npm run build  # Assumes you have a "build" script in your package.json
 
-    - name: Upload Build Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist
-        path: dist/  # Assumes that the build outputs to a "dist" folder
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist/  # Assumes that the build outputs to a "dist" folder
 

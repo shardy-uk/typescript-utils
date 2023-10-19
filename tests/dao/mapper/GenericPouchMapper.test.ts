@@ -1,5 +1,5 @@
-import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
 import {GenericPouchDoc} from "../../../src/dao/GenericPouchDAO";
+import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
 import {PouchEntity} from "../../../src/model/PouchEntity";
 
 describe('GenericPouchMapper', () => {

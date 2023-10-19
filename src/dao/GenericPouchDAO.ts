@@ -1,10 +1,10 @@
-import {v4 as uuidv4} from 'uuid';
+import Joi from "joi";
 import PouchDB from 'pouchdb';
 import PouchDBFind from 'pouchdb-find';
-import Joi from "joi";
+import {v4 as uuidv4} from 'uuid';
 import {createError, ErrorType} from "../errors/Errors";
-import {GenericDAO} from "./GenericDAO";
 import {StringUtils} from "../utils/StringUtils";
+import {GenericDAO} from "./GenericDAO";
 import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);

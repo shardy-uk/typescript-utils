@@ -1,16 +1,20 @@
 # TypeScript Utilities for CRUD Applications
 
-This library serves as a comprehensive toolkit for building CRUD (Create, Read, Update, Delete) applications in TypeScript. It provides a range of utilities designed to accelerate the development process, allowing you to focus on the unique aspects of your application while the boilerplate code is efficiently handled.
+This library serves as a comprehensive toolkit for building CRUD (Create, Read, Update, Delete) applications in TypeScript. It provides a range of
+utilities designed to accelerate the development process, allowing you to focus on the unique aspects of your application while the boilerplate code
+is efficiently handled.
 
 ## Overview
 
 The library is modular, organized into distinct layers and functionalities:
 
-- **DAO (Data Access Object)**: Base implementations for generic data access operations, offering both a standard interface (`GenericDAO`) and a PouchDB-specific implementation (`GenericPouchDAO`).
-  
+- **DAO (Data Access Object)**: Base implementations for generic data access operations, offering both a standard interface (`GenericDAO`) and a
+  PouchDB-specific implementation (`GenericPouchDAO`).
+
 - **Mappers**: Utility for mapping between datastore and domain models, facilitating data transformation.
 
-- **Errors**: A robust error-handling module that includes custom error classes, an error type enumeration, and utility functions for error creation and handling.
+- **Errors**: A robust error-handling module that includes custom error classes, an error type enumeration, and utility functions for error creation
+  and handling.
 
 - **Model**: The starting point for crafting domain models (`Entity` and `PouchEntity`), providing a consistent structure for your application's data.
 
@@ -18,13 +22,15 @@ The library is modular, organized into distinct layers and functionalities:
 
 - **String Utilities**: A collection of string manipulation functions, ranging from capitalization to email validation.
 
-With these foundational elements, you can extend and adapt the library to fit the specific requirements of your CRUD application, whether you're building DTOs (Data Transfer Objects), domain models, or implementing other common operations.
+With these foundational elements, you can extend and adapt the library to fit the specific requirements of your CRUD application, whether you're
+building DTOs (Data Transfer Objects), domain models, or implementing other common operations.
 
 ___
 
 ## DAO
 
-The DAO (Data Access Object) layer is responsible for abstracting the interaction with the data source. In this project, the DAO layer is implemented using PouchDB.
+The DAO (Data Access Object) layer is responsible for abstracting the interaction with the data source. In this project, the DAO layer is implemented
+using PouchDB.
 
 ### Classes
 
@@ -104,35 +110,45 @@ ___
 ## Errors Module
 
 ### ChainedError
-This class extends JavaScript's native `Error` class. It allows for error chaining, i.e., wrapping one error within another. This is useful for providing context when exceptions propagate through multiple layers of an application.
+
+This class extends JavaScript's native `Error` class. It allows for error chaining, i.e., wrapping one error within another. This is useful for
+providing context when exceptions propagate through multiple layers of an application.
 
 - **parentError**: Parent error that caused this chained error.
 
 #### CredentialsError
+
 This is a specific type of `ChainedError` used for credential-related errors.
 
 #### BulkSaveError
+
 This is a specific type of `ChainedError` used when a bulk save operation fails.
 
 #### UserExists
+
 This is a specific type of `ChainedError` used when a user already exists in the system.
 
 #### InvalidUserId
+
 This is a specific type of `ChainedError` used when an invalid user ID is provided.
 
 #### Database Errors
+
 - **DatabaseGetError**: When there's an issue getting data from the database.
 - **DatabaseUpdateError**: When there's an issue updating data in the database.
 - **DatabaseDeleteError**: When there's an issue deleting data from the database.
 - **DatabaseCreateError**: When there's an issue creating new data in the database.
 
 ### ErrorType
+
 This enum lists all available error types.
 
 ### Error Factory Function
+
 - **createError(type, message, parentError)**: Factory function to create new error objects.
 
 ### Utility Function for Error Handling
+
 - **handleErrors**: A utility function for handling errors in async functions.
 
 ___
@@ -140,9 +156,11 @@ ___
 ## Model Module
 
 ### Entity
+
 The starting point for a domain model. It has a single field `id`.
 
 ### PouchEntity
+
 Extends `Entity` and adds `revision` and `entityType` fields.
 
 ___
@@ -150,6 +168,7 @@ ___
 ## Password Module
 
 ### PasswordUtils
+
 Utility class for password hashing and verification.
 
 - **hashPassword(password)**: Hashes a password and returns the salt and hashed password.
@@ -160,6 +179,7 @@ ___
 ## Utils Module
 
 ### StringUtils
+
 Utility class for various string operations.
 
 - **capitalizeFirstLetter**
