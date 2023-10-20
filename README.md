@@ -27,18 +27,18 @@ building DTOs (Data Transfer Objects), domain models, or implementing other comm
 
 ___
 
-## DAO
+# DAO
 
 The DAO (Data Access Object) layer is responsible for abstracting the interaction with the data source. In this project, the DAO layer is implemented
 using PouchDB.
 
-### Classes
+## Classes
 
-#### `GenericDAO` Interface
+### `GenericDAO` Interface
 
 This interface defines the standard CRUD operations along with some additional utility methods.
 
-##### Methods
+#### Methods
 
 - `create(doc: D): Promise<D>`: Creates a new document of type `D`.
 - `getOne(id: string): Promise<D>`: Retrieves a single document by its ID.
@@ -49,11 +49,73 @@ This interface defines the standard CRUD operations along with some additional u
 - `getMany(ids: string[]): Promise<D[]>`: Retrieves multiple documents by their IDs.
 - `findByField(fieldName: string, value: any): Promise<D[]>`: Finds documents by a specific field.
 
-#### `GenericPouchDAO` Class
+---
+
+## Transaction Module
+
+### Transaction Interface
+
+The `Transaction` interface provides a contract for transaction management within a CRUD application. It ensures that all operations within a
+transaction are atomic and consistent.
+
+#### Methods
+
+- `registerUndo(undoFunction: UndoFunction)`: Registers an undo function that will be called if the transaction needs to be rolled back.
+- `rollback()`: Rolls back the transaction, reverting all the operations performed during the transaction.
+- `commit()`: Commits the transaction, making all the operations permanent.
+- `release()`: Releases any resources held by the transaction.
+
+### TransactionManager Class
+
+It's a factory class for creating transaction objects based on the DAO provided.
+
+#### Methods
+
+- `createTransaction(dao: GenericDAO<any>): Transaction`: Creates a transaction object based on the type of DAO provided.
+
+### PouchTransaction and TypeORMTransactionWrapper Classes
+
+These classes implement the `Transaction` interface, one for PouchDB and the other for TypeORM.
+
+---
+
+### Generic ORM DAO
+
+The `GenericOrmDAO` class provides a set of CRUD operations using TypeORM as the underlying ORM.
+
+#### Fields
+
+- `repository`: TypeORM repository for the entity.
+- `mutex`: Mutex for synchronizing operations like `getNextSequenceId`.
+
+#### Methods
+
+- `getQueryRunner()`: Gets the TypeORM query runner associated with the DAO.
+- `create(doc: D, transaction?: Transaction)`: Creates a new document in the database.
+- `getOne(id: string)`: Retrieves a single document by its ID.
+- `getAll()`: Retrieves all documents.
+- `update(doc: D, transaction?: Transaction)`: Updates an existing document.
+- `delete(id: string, transaction?: Transaction)`: Deletes a document by its ID.
+- `getNextSequenceId(counterDocId: string, maxRetries: number)`: Gets the next sequence ID for a given sequence.
+- `getMany(ids: string[])`: Retrieves multiple documents by their IDs.
+- `findByField(fieldName: string, value: any)`: Finds documents by a specific field.
+
+### GenericOrmDoc Class
+
+The base class for documents that will be stored using TypeORM.
+
+#### Fields
+
+- `id`: The unique identifier for the document.
+- `appVersion`: The application version the document was created with.
+- `createdDate`: The date the document was created.
+- `updatedDate`: The date the document was last updated.
+
+### `GenericPouchDAO` Class
 
 Implements the `GenericDAO` interface and provides additional functionalities specific to PouchDB.
 
-##### Methods
+#### Methods
 
 - `getEntityType(): string`: Returns the entity type associated with the DAO.
 - `getNextSequenceId(counterDocId: string): Promise<number>`: Gets the next sequence ID from a counter document.
@@ -68,21 +130,21 @@ Implements the `GenericDAO` interface and provides additional functionalities sp
 - `bulkSave(docs: GenericPouchDoc[]): Promise<GenericPouchDoc[]>`: Performs a bulk save operation on an array of documents.
 - `findByField(fieldName: string, value: any): Promise<D[]>`: Finds documents by a specific field.
 
-#### `ValidatingPouchDAO` Class
+### `ValidatingPouchDAO` Class
 
 Extends `GenericPouchDAO` and adds schema validation for documents.
 
-##### Methods
+#### Methods
 
 - `getSchema(): Joi.ObjectSchema`: Returns the Joi schema for document validation.
 - `create(doc: D): Promise<D>`: Creates a new document with validation.
 - `update(doc: D): Promise<D>`: Updates an existing document with validation.
 
-#### `GenericPouchMapper` Class
+### `GenericPouchMapper` Class
 
 Provides utility methods for converting between PouchDB documents and domain models.
 
-##### Methods
+#### Methods
 
 - `toDomain(dbDoc: GenericPouchDoc): PouchEntity`: Converts a PouchDB document to a domain model.
 - `toDB(domainDoc: PouchEntity): GenericPouchDoc`: Converts a domain model to a PouchDB document.
@@ -114,30 +176,30 @@ ___
 This class extends JavaScript's native `Error` class. It allows for error chaining, i.e., wrapping one error within another. This is useful for
 providing context when exceptions propagate through multiple layers of an application.
 
-- **parentError**: Parent error that caused this chained error.
+- `parentError`: Parent error that caused this chained error.
 
-#### CredentialsError
+### CredentialsError
 
 This is a specific type of `ChainedError` used for credential-related errors.
 
-#### BulkSaveError
+### BulkSaveError
 
 This is a specific type of `ChainedError` used when a bulk save operation fails.
 
-#### UserExists
+### UserExists
 
 This is a specific type of `ChainedError` used when a user already exists in the system.
 
-#### InvalidUserId
+### InvalidUserId
 
 This is a specific type of `ChainedError` used when an invalid user ID is provided.
 
-#### Database Errors
+### Database Errors
 
-- **DatabaseGetError**: When there's an issue getting data from the database.
-- **DatabaseUpdateError**: When there's an issue updating data in the database.
-- **DatabaseDeleteError**: When there's an issue deleting data from the database.
-- **DatabaseCreateError**: When there's an issue creating new data in the database.
+- 'DatabaseGetError': When there's an issue getting data from the database.
+- 'DatabaseUpdateError': When there's an issue updating data in the database.
+- 'DatabaseDeleteError': When there's an issue deleting data from the database.
+- 'DatabaseCreateError': When there's an issue creating new data in the database.
 
 ### ErrorType
 
@@ -145,11 +207,11 @@ This enum lists all available error types.
 
 ### Error Factory Function
 
-- **createError(type, message, parentError)**: Factory function to create new error objects.
+- 'createError(type, message, parentError)': Factory function to create new error objects.
 
 ### Utility Function for Error Handling
 
-- **handleErrors**: A utility function for handling errors in async functions.
+- 'handleErrors': A utility function for handling errors in async functions.
 
 ___
 
@@ -171,8 +233,8 @@ ___
 
 Utility class for password hashing and verification.
 
-- **hashPassword(password)**: Hashes a password and returns the salt and hashed password.
-- **verifyPassword(storedHash, storedSalt, passwordAttempt)**: Verifies a password against a stored hash and salt.
+- `hashPassword(password)`: Hashes a password and returns the salt and hashed password.
+- `verifyPassword(storedHash, storedSalt, passwordAttempt)`: Verifies a password against a stored hash and salt.
 
 ___
 
@@ -180,17 +242,36 @@ ___
 
 ### StringUtils
 
-Utility class for various string operations.
+he `DateUtils` class provides various utility methods for string operations.
 
-- **capitalizeFirstLetter**
-- **truncateWithEllipsis**
-- **toTitleCase**
-- **padLeft**
-- **padRight**
-- **isNullOrEmpty**
-- **isValidEmail**
-- **replaceAll**
-- **removeWhitespace**
-- **stripHtmlTags**
-- **setIfEmpty**
+#### Methods
+
+- `capitalizeFirstLetter(str: string): string`: Capitalizes the first letter of a given string.
+- `truncateWithEllipsis(str: string, length: number): string`: Truncates a string to a specified length and adds an ellipsis at the end.
+- `toTitleCase(str: string): string`: Converts a string to title case.
+- `padLeft(str: string, length: number, padChar = ' '): string`: Pads a string from the left to a specified length with a given character.
+- `padRight(str: string, length: number, padChar = ' '): string`: Pads a string from the right to a specified length with a given character.
+- `isNullOrEmpty(str: string | null | undefined): boolean`: Checks if a string is null, undefined, or empty.
+- `isValidEmail(str: string): boolean`: Validates an email address using a regex pattern.
+- `replaceAll(str: string, find: string, replace: string): string`: Replaces all occurrences of a substring within a string.
+- `removeWhitespace(str: string): string`: Removes all whitespace from a string.
+- `stripHtmlTags(str: string): string`: Removes all HTML tags from a string.
+- `setIfEmpty(value: string | null | undefined, defaultValue: string): string`: Returns the value if it's not null or empty; otherwise, returns the
+  default value.
+
+## DateUtils
+
+The `DateUtils` class provides various utility methods for handling dates in ISO format.
+
+#### Methods
+
+- `nowISO()`: Returns the current date and time in ISO format.
+- `toISO(date: Date)`: Converts a Date object to an ISO string.
+- `fromISO(isoString: string)`: Converts an ISO string to a Date object.
+- `addDays(date: Date, days: number)`: Adds a specified number of days to a Date object.
+- `addHours(date: Date, hours: number)`: Adds a specified number of hours to a Date object.
+- `addMinutes(date: Date, minutes: number)`: Adds a specified number of minutes to a Date object.
+- `isPast(date: Date)`: Checks if the date is in the past.
+- `isFuture(date: Date)`: Checks if the date is in the future.
+- `diffInDays(date1: Date, date2: Date)`: Returns the difference in days between two dates.
 
