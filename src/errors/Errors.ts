@@ -74,6 +74,12 @@ export class DatabaseError extends ChainedError {
     }
 }
 
+export class RollbackError extends ChainedError {
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "RollbackError");
+    }
+}
+
 export class ValidationError extends ChainedError {
     constructor(message: string, parentError?: Error) {
         super(message, parentError, "ValidationError");
@@ -93,6 +99,7 @@ export enum ErrorType {
     HashingError = 'HashingError',
     UserExists = 'UserExists',
     InvalidUserId = 'InvalidUserId',
+    RollbackError = 'RollbackError',
     DatabaseError = 'DatabaseError'
 }
 
@@ -109,6 +116,7 @@ const ErrorClassMap: Record<ErrorType, typeof ChainedError> = {
     [ErrorType.HashingError]: HashingError,
     [ErrorType.UserExists]: UserExists,
     [ErrorType.InvalidUserId]: InvalidUserId,
+    [ErrorType.RollbackError]: RollbackError,
     [ErrorType.DatabaseError]: DatabaseError
 };
 

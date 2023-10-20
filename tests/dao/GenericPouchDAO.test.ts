@@ -298,4 +298,45 @@ describe('GenericPouchDAO with Transactions', () => {
         expect(revertedDoc1.value).toBe('Initial Value');
         expect(allDocs.length).toBe(2);
     });
+
+
+    it('rolls back bulkSave operation', async () => {
+        const commitTransaction = TransactionManager.createTransaction(genericDAO);
+
+        const doc: TestDoc = {
+            _id: undefined,
+            entityType: undefined,
+            name: "To Persist",
+            value: 'Initial Value',
+        };
+
+        const [createdDoc] = await genericDAO.create(doc);
+        await commitTransaction.commit();
+
+        const rollbackTransaction = TransactionManager.createTransaction(genericDAO);
+        const pouchDao = genericDAO as GenericPouchDAO<TestDoc>
+        const doc1: TestDoc = {
+            _id: undefined,
+            entityType: undefined,
+            name: "Should Go",
+            value: 'Initial Value',
+        };
+        const doc2: TestDoc = {
+            _id: undefined,
+            entityType: undefined,
+            name: "Also Should Go",
+            value: 'Initial Value',
+        };
+
+        await pouchDao.bulkSave([doc1, doc2], rollbackTransaction);
+        
+        let allDocs = await pouchDao.getAll();
+        expect(allDocs.length).toBe(3);
+
+        await rollbackTransaction.rollback();
+
+        allDocs = await pouchDao.getAll();
+        expect(allDocs.length).toBe(1);
+        expect(allDocs[0].name).toEqual(createdDoc.name);
+    });
 });

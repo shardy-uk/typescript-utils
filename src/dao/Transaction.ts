@@ -109,8 +109,12 @@ export class PouchTransaction implements Transaction {
     }
 
     async rollback() {
-        for (const undo of this.undoFunctions.reverse()) {
-            await undo();
+        try {
+            for (const undo of this.undoFunctions.reverse()) {
+                await undo();
+            }
+        } catch (error: any) {
+            throw createError(ErrorType.RollbackError, `Failed during rollback: ${error.message}`, error);
         }
     }
 
@@ -149,7 +153,7 @@ export class TypeORMTransactionWrapper implements Transaction {
                 await undo();
             }
         } catch (error: any) {
-            throw createError(ErrorType.DatabaseError, 'Failed to rollback transaction:', error);
+            throw createError(ErrorType.RollbackError, 'Failed to rollback transaction:', error);
         } finally {
             await this.release();
         }

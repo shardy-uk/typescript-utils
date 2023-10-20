@@ -258,29 +258,34 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
             const docsToSave = docs.map(doc => this.populateDefaultFields(doc));
             const response = await this.db.bulkDocs(docsToSave);
 
-            const failedDocs = response.filter((doc: any) => doc.error === true);
-            const successIds = response.filter((doc: any) => !doc.error).map((doc: any) => doc.id);
+            const failedDocs = response.filter((doc: PouchDB.Core.Error) => doc.error === true);
+            const successDetails = response.filter((doc: any) => !doc.error).map((doc: any) => ({_id: doc.id, _rev: doc.rev}));
 
             if (transaction) {
-                // we only need to add the successfully created entities to the rollback as the failed ones don't exist!
-                const undoFunctions: UndoFunction[] = successIds.map((id) => {
-                    return async () => {
-                        await this.db.remove(id);
-                    };
-                });
-                undoFunctions.forEach(undoFunction => transaction.registerUndo(undoFunction));
+                successDetails
+                    .map(({_id, _rev}) => {
+                        return async () => {
+                            await this.db.remove(_id, _rev);
+                        };
+                    })
+                    .forEach(undoFunction => transaction.registerUndo(undoFunction));
             }
 
             if (failedDocs.length > 0) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw createError(ErrorType.BulkSaveError, 'Bulk save failed for some documents: ' + JSON.stringify(failedDocs));
             } else {
-                return [docsToSave.map((doc, index) => ({...doc, _id: successIds[index]})) as GenericPouchDoc[], transaction];
+                return [docsToSave.map((doc, index) => ({
+                    ...doc,
+                    _id: successDetails[index]._id,
+                    _rev: successDetails[index]._rev
+                })) as GenericPouchDoc[], transaction];
             }
         } catch (error: any) {
             throw createError(ErrorType.BulkSaveError, 'Failed to save documents in bulk', error);
         }
     }
+
 
     /**
      * Restores a deleted document by its ID.
