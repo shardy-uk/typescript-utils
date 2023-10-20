@@ -91,9 +91,12 @@ export class TransactionManager {
         if (dao instanceof GenericPouchDAO) {
             return new PouchTransaction();
         } else if (dao instanceof GenericOrmDAO) {
+            if (!dao || !dao.getQueryRunner()) {
+                throw createError(ErrorType.DatabaseError, `No Query Runner available in DAO`);
+            }
             return new TypeORMTransactionWrapper(dao.getQueryRunner());
         } else {
-            throw new Error("Unsupported DAO type");
+            throw createError(ErrorType.DatabaseError, `DAO Type not recognised: ${typeof dao}`);
         }
     }
 }

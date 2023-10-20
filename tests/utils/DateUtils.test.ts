@@ -4,6 +4,7 @@ describe('DateUtils', () => {
 
     describe('nowISO', () => {
         it('should return the current date and time in ISO format', () => {
+            // very occasionally this test blows up due to clock speed of CPU
             const now = new Date().toISOString();
             const result = DateUtils.nowISO();
             expect(result).toEqual(now);

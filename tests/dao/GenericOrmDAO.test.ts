@@ -1,6 +1,7 @@
 import {Column, DataSource, Entity} from "typeorm";
 import {GenericDAO} from "../../src/dao/GenericDAO";
 import {Counter, GenericOrmDAO, GenericOrmDoc} from "../../src/dao/GenericOrmDAO";
+import {TransactionManager} from "../../src/dao/Transaction";
 
 @Entity()
 export class ExampleDoc extends GenericOrmDoc {
@@ -134,5 +135,119 @@ describe('GenericOrmDAO', () => {
             Array.from({length: NUM_CONCURRENT_CALLS}, (_, i) => i + 1)
         );
         expect(new Set(sequenceNumbers)).toEqual(expectedSet);
+    });
+});
+
+describe('GenericOrmDAO with Transactions', () => {
+    let dataSource: DataSource;
+    let genericDAO: GenericDAO<ExampleDoc>;
+
+    beforeEach(async () => {
+        dataSource = new DataSource({
+            type: 'sqlite',
+            database: ':memory:',
+            entities: [GenericOrmDoc, ExampleDoc],
+            synchronize: true
+        });
+        await dataSource.initialize();
+
+        genericDAO = new GenericOrmDAO(ExampleDoc, dataSource.manager, "0.0.1-alpha");
+    });
+
+    afterEach(async () => {
+        await dataSource.destroy();
+    });
+
+    it('rolls back a document creation', async () => {
+        const transaction = TransactionManager.createTransaction(genericDAO);
+        const doc = new ExampleDoc();
+        doc.name = "ToBeRolledBack";
+        doc.value = 'Initial Value';
+
+        await genericDAO.create(doc, transaction);
+
+        let allDocs = await genericDAO.getAll();
+        expect(allDocs.length).toBe(1);
+
+        await transaction.rollback();
+
+        allDocs = await genericDAO.getAll();
+        expect(allDocs.length).toBe(0);
+    });
+
+    it('rolls back a document update', async () => {
+
+        const initialDoc = new ExampleDoc();
+        initialDoc.name = "ToBeUpdated";
+        initialDoc.value = 'Initial Value';
+
+        const [createdDoc] = await genericDAO.create(initialDoc);
+
+        const transaction = TransactionManager.createTransaction(genericDAO);
+        createdDoc.value = 'Updated Value';
+        const [savedDoc] = await genericDAO.update(createdDoc, transaction);
+        expect(savedDoc.value).toBe('Updated Value');
+
+        await transaction.rollback();
+
+        const revertedDoc = await genericDAO.getOne(createdDoc.id!);
+        expect(revertedDoc.value).toBe('Initial Value');
+        expect(revertedDoc.id).toBe(createdDoc.id);
+    });
+
+    it('rolls back a document deletion', async () => {
+        // THIS TEST MAY FAIL IF TYPEORM FIX ROLLBACK FOR DELETE!!
+        // I'm working around this by making the DAO manually restore the entity using the Transaction rollback steps
+        const doc = new ExampleDoc();
+        doc.name = "ToBeDeleted";
+        doc.value = 'Initial Value';
+        const saveTransaction = TransactionManager.createTransaction(genericDAO);
+        const [createdDoc] = await genericDAO.create(doc, saveTransaction);
+
+        let allDocs = await genericDAO.getAll();
+        expect(allDocs.length).toBe(1);
+        await saveTransaction.commit();
+
+        const deleteTransaction = TransactionManager.createTransaction(genericDAO);
+        await genericDAO.delete(createdDoc.id!, deleteTransaction);
+
+        allDocs = await genericDAO.getAll();
+        expect(allDocs.length).toBe(0);
+
+        await deleteTransaction.rollback();
+
+        allDocs = await genericDAO.getAll();
+        expect(allDocs.length).toBe(1);
+        expect(allDocs[0].id).toBe(createdDoc.id);
+    });
+
+
+    it('rolls back multiple operations', async () => {
+
+        const doc1 = new ExampleDoc();
+        doc1.name = "ToBeUpdated";
+        doc1.value = 'Initial Value';
+
+        const doc2 = new ExampleDoc();
+        doc2.name = "ToBeDeleted";
+        doc2.value = 'Initial Value';
+
+        const [createdDoc1] = await genericDAO.create(doc1);
+        const [createdDoc2] = await genericDAO.create(doc2);
+
+        createdDoc1.value = 'Updated Value';
+
+        const transaction = TransactionManager.createTransaction(genericDAO);
+        const [savedDoc] = await genericDAO.update(createdDoc1, transaction);
+        await genericDAO.delete(createdDoc2.id!, transaction);
+        expect(savedDoc.value).toBe('Updated Value');
+
+        await transaction.rollback();
+
+        const revertedDoc1 = await genericDAO.getOne(createdDoc1.id!);
+        const allDocs = await genericDAO.getAll();
+
+        expect(revertedDoc1.value).toBe('Initial Value');
+        expect(allDocs.length).toBe(2);
     });
 });

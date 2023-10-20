@@ -13,6 +13,7 @@ import {
 } from "typeorm";
 import {createError, ErrorType} from "../errors/Errors";
 import {DateUtils} from "../utils/DateUtils";
+import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, TypeORMTransactionWrapper} from "./Transaction";
 
@@ -29,12 +30,16 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
     }
 
     public getQueryRunner(): QueryRunner {
-        return this.entityManager.queryRunner!;
+        if (this.entityManager.queryRunner) {
+            return this.entityManager.queryRunner
+        } else {
+            return this.entityManager.connection.createQueryRunner();
+        }
     }
 
     async create(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
-        doc.createdDate = DateUtils.nowISO();
-        doc.appVersion = this.appVersion;
+        doc.createdDate = StringUtils.setIfEmpty(doc.createdDate, DateUtils.nowISO());
+        doc.appVersion = StringUtils.setIfEmpty(doc.appVersion, this.appVersion);
         const manager = this.getManager(transaction);
         const savedDoc = await manager.save(this.entity, doc);
         return [savedDoc, transaction];
@@ -66,11 +71,19 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
 
     async delete(id: string, transaction?: Transaction): Promise<[string, Transaction?]> {
         const manager = this.getManager(transaction);
+        const deletedDoc = await this.getOne(id);  // Store the state
+        if (transaction) {
+            // we have to do this as for some reason deletes aren't respected properly in the rollback of TypeORM SQLite databases?!?
+            transaction.registerUndo(async () => {
+                // Re-insert the deleted doc
+                await this.create(deletedDoc, transaction);
+            });
+        }
         const result = await manager.delete(this.entity, id);
         if (result.affected === 0) {
             return [`No entity found with id: ${id}`, transaction];
         }
-        return [id, transaction];
+        return [result.affected!.toString(), transaction];
     }
 
     async getNextSequenceId(counterDocId: string, maxRetries: number = 200): Promise<number> {
