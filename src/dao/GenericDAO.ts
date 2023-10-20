@@ -9,10 +9,10 @@ export interface GenericDAO<D> {
      * Creates a new document in the database.
      *
      * @param {D} doc - The document to be created.
+     * @param {Transaction}transaction - If a Transaction object is provided, the create operation will be part of that transaction.
      * @returns {Promise<[D, Transaction?]>} A promise that resolves with the created document and an optional Transaction object.
-     * @remarks If a Transaction object is provided, the create operation will be part of that transaction.
      */
-    create(doc: D): Promise<[D, (Transaction | undefined)?]>;
+    create(doc: D, transaction?: Transaction): Promise<[D, (Transaction | undefined)?]>;
 
     /**
      * Retrieves a document from the database by its ID.
@@ -33,19 +33,19 @@ export interface GenericDAO<D> {
      * Updates an existing document in the database.
      *
      * @param {D} doc - The document to be updated.
+     * @param {Transaction}transaction - If a Transaction object is provided, the create operation will be part of that transaction.
      * @returns {Promise<[D, Transaction?]>} A promise that resolves with the updated document and an optional Transaction object.
-     * @remarks If a Transaction object is provided, the update operation will be part of that transaction.
      */
-    update(doc: D): Promise<[D, (Transaction | undefined)?]>;
+    update(doc: D, transaction?: Transaction): Promise<[D, (Transaction | undefined)?]>;
 
     /**
      * Deletes a document from the database by its ID.
      *
      * @param {string} id - The ID of the document to be deleted.
+     * @param {Transaction}transaction - If a Transaction object is provided, the create operation will be part of that transaction.
      * @returns {Promise<[string, Transaction?]>} A promise that resolves with a string indicating the outcome and an optional Transaction object.
-     * @remarks If a Transaction object is provided, the delete operation will be part of that transaction.
      */
-    delete(id: string): Promise<[string, Transaction?]>;
+    delete(id: string, transaction?: Transaction): Promise<[string, Transaction?]>;
 
     /**
      * Retrieves the next sequence ID for a given sequence.

@@ -6,14 +6,84 @@ import {GenericPouchDAO} from "./GenericPouchDAO";
 
 export type UndoFunction = () => Promise<any>;
 
+/**
+ * Transaction Interface
+ *
+ * This interface defines the contract for transaction management.
+ */
 export interface Transaction {
+
+    /**
+     * Register an undo function to the transaction.
+     *
+     * This method is used for registering a function that will undo a specific operation if the transaction is rolled back.
+     *
+     * @param {UndoFunction} undoFunction - The function that will undo a specific operation.
+     *
+     * @example
+     * ```typescript
+     * transaction.registerUndo(async () => {
+     *     // Undo some operation e.g., delete an inserted record
+     * });
+     * ```
+     */
     registerUndo(undoFunction: UndoFunction): void;
 
-    rollback(): void;
+    /**
+     * Rollback the transaction.
+     *
+     * This method will undo all registered operations in reverse order of their registration. It should be used when an operation within the transaction fails and you want to revert to the initial state.
+     *
+     * @returns {Promise<void>} A Promise that will be resolved when all undo functions have been executed.
+     *
+     * @example
+     * ```typescript
+     * try {
+     *     // Perform some operations
+     * } catch (error) {
+     *     await transaction.rollback();
+     * }
+     * ```
+     */
+    rollback(): Promise<void>;
 
-    commit(): void;
+    /**
+     * Commit the transaction.
+     *
+     * This method should be called when all operations within the transaction are successful. It may also perform any necessary clean-up activities.
+     *
+     * @returns {Promise<void>} A Promise that will be resolved when the transaction has been successfully committed.
+     *
+     * @example
+     * ```typescript
+     * try {
+     *     // Perform some operations
+     *     await transaction.commit();
+     * } catch (error) {
+     *     await transaction.rollback();
+     * }
+     * ```
+     */
+    commit(): Promise<void>;
 
-    release(): void;
+    /**
+     * Release any resources held by the transaction.
+     *
+     * This method should be called after a commit or rollback to ensure that any resources held by the transaction are released.
+     *
+     * @returns {Promise<void>} A Promise that will be resolved when all resources have been released.
+     *
+     * @example
+     * ```typescript
+     * try {
+     *     // Perform some operations
+     *     await transaction.commit();
+     * } finally {
+     *     await transaction.release();
+     * }
+     * ```
+     */
+    release(): Promise<void>;
 }
 
 export class TransactionManager {
@@ -43,10 +113,12 @@ export class PouchTransaction implements Transaction {
 
     commit() {
         // No-op as nothing to do here with PouchDB
+        return Promise.resolve();
     }
 
     release() {
         this.undoFunctions = [];
+        return Promise.resolve();
     }
 }
 
@@ -91,7 +163,11 @@ export class TypeORMTransactionWrapper implements Transaction {
     }
 
     release() {
-        return this.queryRunner.release();
+        if (this.queryRunner) {
+            return this.queryRunner.release();
+        } else {
+            return Promise.resolve();
+        }
     }
 
     private async start() {

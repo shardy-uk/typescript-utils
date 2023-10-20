@@ -160,7 +160,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
 
             if (transaction) {
                 const undoFunction: UndoFunction = async () => {
-                    await this.db.remove(docWithId._id!, docWithId._rev!);
+                    await this.db.remove(response.id, response.rev);
                 };
                 transaction.registerUndo(undoFunction);
             }
@@ -189,16 +189,17 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
         }
         try {
             const existingDoc: GenericPouchDoc = await this.db.get(doc._id);
-            const updatedDoc = {...existingDoc, ...doc, _rev: existingDoc._rev, updatedDate: DateUtils.nowISO()};
+            const updatedDoc = {...existingDoc, ...doc, updatedDate: DateUtils.nowISO()};
+
+            const savedDoc = await this.db.put(updatedDoc);
 
             if (transaction) {
                 const undoFunction: UndoFunction = async () => {
-                    await this.db.put(existingDoc);
+                    await this.db.put({...existingDoc, _rev: savedDoc.rev});
                 };
                 transaction.registerUndo(undoFunction);
             }
 
-            await this.db.put(updatedDoc);
             return [await this.getOne(doc._id), transaction];
         } catch (error: any) {
             let message = `Exception thrown in GenericPouchDAO.update: ${error.message} - `
@@ -206,26 +207,6 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
                 message += "Update Conflict, _rev does not match DB value";
             }
             throw createError(ErrorType.DatabaseUpdateError, message, error);
-        }
-    }
-
-    /**
-     * Restores a deleted document by its ID.
-     * @async
-     * @returns A promise that resolves to the restored document or null if the document cannot be restored.
-     * @param doc The deleted document to restore
-     */
-    async restore(doc: D): Promise<D> {
-        try {
-            // Remove the _deleted flag and save the document again
-            if ((doc as any)._deleted) {
-                delete (doc as any)._deleted;
-            }
-
-            await this.db.put(doc);
-            return this.getOne(doc._id!);
-        } catch (error: any) {
-            throw createError(ErrorType.DatabaseError, `Failed to restore document with ID: ${doc._id}`, error);
         }
     }
 
@@ -240,14 +221,14 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
         try {
             const existingDoc = await this.db.get(docId);
 
+            const response = await this.db.remove(existingDoc);
+
             if (transaction) {
                 const undoFunction: UndoFunction = async () => {
-                    await this.db.put(existingDoc);
+                    await this.restore({...existingDoc, _rev: response.rev} as D);
                 };
                 transaction.registerUndo(undoFunction);
             }
-
-            const response = await this.db.remove(existingDoc);
             return [response.rev, transaction];
         } catch (error: any) {
             throw createError(ErrorType.DatabaseDeleteError, `Error deleting document: ${docId}`, error);
@@ -260,7 +241,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      *
      * @async
      * @param {GenericPouchDoc[]} docs - The array of documents to save.
-     * @param transaction
+     * @param {Transaction}transaction - If a Transaction object is provided, the create operation will be part of that transaction.
      * @returns {Promise<GenericPouchDoc[]>} A promise that resolves to an array of the saved documents.
      *
      * @throws Will throw BulkSaveError if the bulk save operation fails for any document. contains both successful and failed docids
@@ -298,6 +279,26 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
             }
         } catch (error: any) {
             throw createError(ErrorType.BulkSaveError, 'Failed to save documents in bulk', error);
+        }
+    }
+
+    /**
+     * Restores a deleted document by its ID.
+     * @async
+     * @returns A promise that resolves to the restored document or null if the document cannot be restored.
+     * @param doc The deleted document to restore
+     */
+    private async restore(doc: D): Promise<D> {
+        try {
+            // Remove the _deleted flag and save the document again
+            if ((doc as any)._deleted) {
+                delete (doc as any)._deleted;
+            }
+
+            await this.db.put(doc);
+            return this.getOne(doc._id!);
+        } catch (error: any) {
+            throw createError(ErrorType.DatabaseError, `Failed to restore document with ID: ${doc._id}`, error);
         }
     }
 
