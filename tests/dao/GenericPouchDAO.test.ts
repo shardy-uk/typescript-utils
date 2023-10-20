@@ -23,7 +23,7 @@ describe('GenericPouchDAO', () => {
 
     it('creates and retrieves a document', async () => {
         const doc: TestDoc = {_id: undefined, entityType: undefined, name: "SomeThing", value: 'Some Value', appVersion: '0.0.1-alpha',};
-        const savedEntity = await genericDAO.create(doc);
+        const [savedEntity] = await genericDAO.create(doc);
         if (!savedEntity._id) {
             fail('doc._id should not be null or undefined');
         }
@@ -38,7 +38,7 @@ describe('GenericPouchDAO', () => {
 
     it('updates a document', async () => {
         const payload: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value'};
-        const doc = await genericDAO.create(payload);
+        const [doc] = await genericDAO.create(payload);
         if (!doc._id) {
             fail('doc._id should not be null or undefined');
         }
@@ -54,7 +54,7 @@ describe('GenericPouchDAO', () => {
 
     it('deletes a document', async () => {
         const doc: TestDoc = {_id: "", entityType: "", name: 'test', value: 'Some Value'};
-        const savedEntity = await genericDAO.create(doc);
+        const [savedEntity] = await genericDAO.create(doc);
         if (!savedEntity._id) {
             fail('doc._id should not be null or undefined');
         }
@@ -72,9 +72,9 @@ describe('GenericPouchDAO', () => {
         const doc2: TestDoc = {_id: "", entityType: "", name: 'test2', value: 'Some Value 2'};
         const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3'};
 
-        const id1 = await genericDAO.create(doc1);
-        const id2 = await genericDAO.create(doc2);
-        const id3 = await genericDAO.create(doc3);
+        const [id1] = await genericDAO.create(doc1);
+        const [id2] = await genericDAO.create(doc2);
+        const [id3] = await genericDAO.create(doc3);
         if (!id1._id || !id2._id || !id3._id) {
             fail(`doc._id should not be null`);
         }
@@ -134,7 +134,7 @@ describe('GenericPouchDAO', () => {
             const doc3: TestDoc = {_id: "", entityType: "", name: 'test3', value: 'Some Value 3', appVersion: '0.0.1-alpha',};
 
             // Perform the bulk save operation
-            const bulkSaveResult = await pouchDAO.bulkSave([doc1, doc2, doc3]);
+            const [bulkSaveResult] = await pouchDAO.bulkSave([doc1, doc2, doc3]);
 
             // Validate that the result of the bulk save contains all the docs
             expect(bulkSaveResult.length).toBe(3);

@@ -6,6 +6,7 @@ import {createError, ErrorType} from "../errors/Errors";
 import {DateUtils} from "../utils/DateUtils";
 import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
+import {Transaction, UndoFunction} from "./Transaction";
 import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);
@@ -149,14 +150,23 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * Creates a new document.
      * @async
      * @param doc - The document to create.
+     * @param transaction
      * @returns A promise that resolves to the created document.
      */
-    async create(doc: D): Promise<D> {
+    async create(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
         try {
             const docWithId = this.populateDefaultFields(doc);
             const response = await this.db.put(docWithId);
+
+            if (transaction) {
+                const undoFunction: UndoFunction = async () => {
+                    await this.db.remove(docWithId._id!, docWithId._rev!);
+                };
+                transaction.registerUndo(undoFunction);
+            }
+
             if (response && response.ok) {
-                return this.getOne(response.id);
+                return [await this.getOne(response.id), transaction];
             } else {
                 // noinspection ExceptionCaughtLocallyJS
                 throw createError(ErrorType.DatabaseCreateError, `Unable to create document ${docWithId.entityType} with ID: ${docWithId._id}`);
@@ -170,17 +180,26 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * Updates an existing document by its ID.
      * @async
      * @param doc - The updated document.
+     * @param transaction
      * @returns A promise that resolves to the updated document.
      */
-    async update(doc: D): Promise<D> {
+    async update(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
         if (!doc || !doc._id) {
             throw createError(ErrorType.ValidationError, "Update called, but no document ID provided");
         }
         try {
             const existingDoc: GenericPouchDoc = await this.db.get(doc._id);
             const updatedDoc = {...existingDoc, ...doc, _rev: existingDoc._rev, updatedDate: DateUtils.nowISO()};
+
+            if (transaction) {
+                const undoFunction: UndoFunction = async () => {
+                    await this.db.put(existingDoc);
+                };
+                transaction.registerUndo(undoFunction);
+            }
+
             await this.db.put(updatedDoc);
-            return this.getOne(doc._id);
+            return [await this.getOne(doc._id), transaction];
         } catch (error: any) {
             let message = `Exception thrown in GenericPouchDAO.update: ${error.message} - `
             if (error.name === 'conflict') {
@@ -214,12 +233,22 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * Deletes a document by its ID.
      * @async
      * @param {string} docId - The document ID.
+     * @param transaction
      * @returns {Promise<string>} A promise that resolves to the deleted documents _rev.
      */
-    async delete(docId: string): Promise<string> {
+    async delete(docId: string, transaction?: Transaction): Promise<[string, Transaction?]> {
         try {
             const existingDoc = await this.db.get(docId);
-            return (await this.db.remove(existingDoc)).rev;
+
+            if (transaction) {
+                const undoFunction: UndoFunction = async () => {
+                    await this.db.put(existingDoc);
+                };
+                transaction.registerUndo(undoFunction);
+            }
+
+            const response = await this.db.remove(existingDoc);
+            return [response.rev, transaction];
         } catch (error: any) {
             throw createError(ErrorType.DatabaseDeleteError, `Error deleting document: ${docId}`, error);
         }
@@ -231,6 +260,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      *
      * @async
      * @param {GenericPouchDoc[]} docs - The array of documents to save.
+     * @param transaction
      * @returns {Promise<GenericPouchDoc[]>} A promise that resolves to an array of the saved documents.
      *
      * @throws Will throw BulkSaveError if the bulk save operation fails for any document. contains both successful and failed docids
@@ -242,7 +272,7 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
      * Make sure to provide the correct `entityType` for each document in the array.
      * Failing to do so can lead to incorrect data being saved in the database.
      */
-    async bulkSave(docs: GenericPouchDoc[]): Promise<GenericPouchDoc[]> {
+    async bulkSave(docs: GenericPouchDoc[], transaction?: Transaction): Promise<[GenericPouchDoc[], Transaction?]> {
         try {
             const docsToSave = docs.map(doc => this.populateDefaultFields(doc));
             const response = await this.db.bulkDocs(docsToSave);
@@ -250,16 +280,27 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
             const failedDocs = response.filter((doc: any) => doc.error === true);
             const successIds = response.filter((doc: any) => !doc.error).map((doc: any) => doc.id);
 
+            if (transaction) {
+                // we only need to add the successfully created entities to the rollback as the failed ones don't exist!
+                const undoFunctions: UndoFunction[] = successIds.map((id) => {
+                    return async () => {
+                        await this.db.remove(id);
+                    };
+                });
+                undoFunctions.forEach(undoFunction => transaction.registerUndo(undoFunction));
+            }
+
             if (failedDocs.length > 0) {
                 // noinspection ExceptionCaughtLocallyJS
                 throw createError(ErrorType.BulkSaveError, 'Bulk save failed for some documents: ' + JSON.stringify(failedDocs));
             } else {
-                return docsToSave.map((doc, index) => ({...doc, _id: successIds[index]})) as GenericPouchDoc[];
+                return [docsToSave.map((doc, index) => ({...doc, _id: successIds[index]})) as GenericPouchDoc[], transaction];
             }
         } catch (error: any) {
             throw createError(ErrorType.BulkSaveError, 'Failed to save documents in bulk', error);
         }
     }
+
 
     /**
      * Finds documents by a field's value. Almost certainly wants an index creating on these fields
@@ -309,21 +350,21 @@ export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>
 export abstract class ValidatingPouchDAO<D extends GenericPouchDoc> extends GenericPouchDAO<D> {
     abstract getSchema(): Joi.ObjectSchema;
 
-    async create(doc: D): Promise<D> {
+    async create(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
         const docWithId = this.populateDefaultFields(doc);
         const validation = this.getSchema().validate(docWithId);
         if (validation.error) {
             throw createError(ErrorType.ValidationError, `Validation failed: ${validation.error.details.map(d => d.message).join(', ')}`);
         }
-        return super.create(doc);
+        return super.create(doc, transaction);
     }
 
-    async update(doc: D): Promise<D> {
+    async update(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
         const validation = this.getSchema().validate(doc);
         if (validation.error) {
             throw createError(ErrorType.ValidationError, `Validation failed: ${validation.error.details.map(d => d.message).join(', ')}`);
         }
-        return super.update(doc);
+        return super.update(doc, transaction);
     }
 }
 

@@ -6,6 +6,7 @@ import {
     EntityManager,
     OptimisticLockVersionMismatchError,
     PrimaryGeneratedColumn,
+    QueryRunner,
     Repository,
     UpdateDateColumn,
     VersionColumn
@@ -13,6 +14,7 @@ import {
 import {createError, ErrorType} from "../errors/Errors";
 import {DateUtils} from "../utils/DateUtils";
 import {GenericDAO} from "./GenericDAO";
+import {Transaction, TypeORMTransactionWrapper} from "./Transaction";
 
 export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
     private repository: Repository<D>;
@@ -26,10 +28,16 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
         this.repository = this.entityManager.getRepository<D>(entity);
     }
 
-    async create(doc: D): Promise<D> {
+    public getQueryRunner(): QueryRunner {
+        return this.entityManager.queryRunner!;
+    }
+
+    async create(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
         doc.createdDate = DateUtils.nowISO();
         doc.appVersion = this.appVersion;
-        return await this.repository.save(doc);
+        const manager = this.getManager(transaction);
+        const savedDoc = await manager.save(this.entity, doc);
+        return [savedDoc, transaction];
     }
 
     async getOne(id: string): Promise<D> {
@@ -49,17 +57,20 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
         return await this.repository.find();
     }
 
-    async update(doc: D): Promise<D> {
+    async update(doc: D, transaction?: Transaction): Promise<[D, Transaction?]> {
         doc.updatedDate = DateUtils.nowISO();
-        await this.repository.save(doc);
-        return doc;
+        const manager = this.getManager(transaction);
+        const updatedDoc = await manager.save(this.entity, doc);
+        return [updatedDoc, transaction];
     }
 
-    async delete(id: string): Promise<void | string> {
-        const result = await this.repository.delete(id);
+    async delete(id: string, transaction?: Transaction): Promise<[string, Transaction?]> {
+        const manager = this.getManager(transaction);
+        const result = await manager.delete(this.entity, id);
         if (result.affected === 0) {
-            return `No entity found with id: ${id}`;
+            return [`No entity found with id: ${id}`, transaction];
         }
+        return [id, transaction];
     }
 
     async getNextSequenceId(counterDocId: string, maxRetries: number = 200): Promise<number> {
@@ -102,7 +113,6 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
         throw createError(ErrorType.DatabaseError, `Exceeded max retries (${maxRetries}) while trying to get next sequence ID for ${counterDocId}`);
     }
 
-
     async getMany(ids: string[]): Promise<D[]> {
         return await this.repository
             .createQueryBuilder("entity")
@@ -115,6 +125,13 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
             .createQueryBuilder("entity")
             .where(`entity.${fieldName} = :value`, {value})
             .getMany();
+    }
+
+    private getManager(transaction?: Transaction): EntityManager {
+        if (transaction && transaction instanceof TypeORMTransactionWrapper) {
+            return transaction.queryRunner.manager;  // This is within the transaction
+        }
+        return this.entityManager;  // This is outside of the transaction
     }
 }
 

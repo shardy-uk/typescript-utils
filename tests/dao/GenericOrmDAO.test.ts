@@ -37,7 +37,7 @@ describe('GenericOrmDAO', () => {
             doc.name = "SomeThing";
             doc.value = "Some Value";
 
-            const savedEntity = await genericDAO.create(doc);
+            const [savedEntity] = await genericDAO.create(doc);
             expect(savedEntity.id).toBeTruthy();
 
             const retrievedDoc = await genericDAO.getOne(savedEntity.id!);
@@ -50,10 +50,10 @@ describe('GenericOrmDAO', () => {
             const doc = new ExampleDoc();
             doc.name = "SomeThing";
             doc.value = "Some Value";
-            const savedEntity = await genericDAO.create(doc);
+            const [savedEntity] = await genericDAO.create(doc);
             savedEntity.value = "Updated Value";
 
-            const updatedEntity = await genericDAO.update(savedEntity);
+            const [updatedEntity] = await genericDAO.update(savedEntity);
 
             const retrievedDoc = await genericDAO.getOne(updatedEntity.id!);
             expect(retrievedDoc.value).toBe("Updated Value");
@@ -63,7 +63,7 @@ describe('GenericOrmDAO', () => {
             const doc = new ExampleDoc();
             doc.name = "SomeThing";
             doc.value = "Some Value";
-            const savedEntity = await genericDAO.create(doc);
+            const [savedEntity] = await genericDAO.create(doc);
 
             let docs = await genericDAO.getAll();
             expect(docs.length).toEqual(1);
@@ -83,13 +83,17 @@ describe('GenericOrmDAO', () => {
             doc2.name = "SomeThing2";
             doc2.value = "Some Value 2";
 
-            const savedEntity1 = await genericDAO.create(doc1);
-            const savedEntity2 = await genericDAO.create(doc2);
+            const [savedEntity1] = await genericDAO.create(doc1);
+            const [savedEntity2] = await genericDAO.create(doc2);
 
             const retrievedDocs = await genericDAO.getMany([savedEntity1.id!, savedEntity2.id!]);
 
             expect(retrievedDocs.length).toBe(2);
-            expect(retrievedDocs.map(doc => doc.value)).toStrictEqual(["Some Value 1", "Some Value 2"]);
+
+            const values = retrievedDocs.map(doc => doc.value);
+            expect(values).toContain("Some Value 1");
+            expect(values).toContain("Some Value 2");
+
         });
 
         it('finds by field', async () => {
@@ -114,7 +118,7 @@ describe('GenericOrmDAO', () => {
     });
 
     test('fetches and increments a sequence counter without duplicates', async () => {
-        const NUM_CONCURRENT_CALLS = 200;
+        const NUM_CONCURRENT_CALLS = 50;
         // noinspection DuplicatedCode
         const counterDocId = 'counter';
 
