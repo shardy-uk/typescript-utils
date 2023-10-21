@@ -1,6 +1,10 @@
-import {Entity} from "./Entity";
+import {Entity} from "../../model/Entity";
 
 export interface PouchEntity extends Entity {
     revision?: string;
     entityType?: string;
+}
+
+export interface TormEntity extends Entity {
+
 }

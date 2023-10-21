@@ -1,5 +1,6 @@
-import {PouchEntity} from "../../model/PouchEntity";
-import {GenericPouchDoc} from "../GenericPouchDAO";
+import {GenericPouchDoc} from "../types/DbTypes";
+import {PouchEntity} from "../types/DomainTypes";
+
 
 export class GenericPouchMapper {
     /**

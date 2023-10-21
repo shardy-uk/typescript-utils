@@ -1,21 +1,10 @@
-import {
-    BaseEntity,
-    Column,
-    CreateDateColumn,
-    Entity,
-    EntityManager,
-    OptimisticLockVersionMismatchError,
-    PrimaryGeneratedColumn,
-    QueryRunner,
-    Repository,
-    UpdateDateColumn,
-    VersionColumn
-} from "typeorm";
+import {EntityManager, OptimisticLockVersionMismatchError, QueryRunner, Repository} from "typeorm";
 import {createError, ErrorType} from "../errors/Errors";
 import {DateUtils} from "../utils/DateUtils";
 import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, TypeORMTransactionWrapper} from "./Transaction";
+import {Counter, GenericOrmDoc} from "./types/DbTypes";
 
 export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
     private repository: Repository<D>;
@@ -145,40 +134,6 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
             return transaction.queryRunner.manager;  // This is within the transaction
         }
         return this.entityManager;  // This is outside of the transaction
-    }
-}
-
-
-export abstract class GenericOrmDoc extends BaseEntity {
-    @PrimaryGeneratedColumn("uuid")
-    id?: string;
-
-    @Column({type: "varchar"})
-    appVersion?: string;
-
-    @CreateDateColumn({type: "varchar", nullable: true})
-    createdDate?: string;
-
-    @UpdateDateColumn({type: "varchar", nullable: true})
-    updatedDate?: string;
-}
-
-@Entity('Counters')  // Defines the table name
-export class Counter extends BaseEntity {
-    @PrimaryGeneratedColumn('uuid')
-    id?: string;  // The unique ID of the counter
-    @Column('varchar')
-    name: string;
-    @Column('int')
-    seq: number;  // The current sequence number
-    @VersionColumn()
-    version: number;
-
-    constructor(name: string, seq: number) {
-        super();
-        this.name = name;
-        this.seq = seq;
-        this.version = 1;
     }
 }
 

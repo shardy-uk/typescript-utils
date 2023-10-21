@@ -1,7 +1,8 @@
 import {Column, DataSource, Entity} from "typeorm";
 import {GenericDAO} from "../../src/dao/GenericDAO";
-import {Counter, GenericOrmDAO, GenericOrmDoc} from "../../src/dao/GenericOrmDAO";
+import {GenericOrmDAO} from "../../src/dao/GenericOrmDAO";
 import {TransactionManager} from "../../src/dao/Transaction";
+import {Counter, GenericOrmDoc} from "../../src/dao/types/DbTypes";
 
 @Entity()
 export class ExampleDoc extends GenericOrmDoc {

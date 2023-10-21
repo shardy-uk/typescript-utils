@@ -1,6 +1,7 @@
-import {GenericPouchDoc} from "../../../src/dao/GenericPouchDAO";
+import {PouchEntity} from "../../../dist/model/PouchEntity";
 import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
-import {PouchEntity} from "../../../src/model/PouchEntity";
+import {GenericPouchDoc} from "../../../src/dao/types/DbTypes";
+
 
 describe('GenericPouchMapper', () => {
     describe('toDomain', () => {

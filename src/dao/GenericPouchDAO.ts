@@ -7,6 +7,7 @@ import {DateUtils} from "../utils/DateUtils";
 import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, UndoFunction} from "./Transaction";
+import {GenericPouchDoc} from "./types/DbTypes";
 import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);
@@ -372,18 +373,6 @@ export abstract class ValidatingPouchDAO<D extends GenericPouchDoc> extends Gene
         }
         return super.update(doc, transaction);
     }
-}
-
-
-export interface GenericPouchDoc {
-    _id?: string;
-    _rev?: string;
-    entityType?: string;
-    appVersion?: string;
-    createdDate?: string;
-    updatedDate?: string;
-
-    [key: string]: any;
 }
 
 interface AllDocsResponse<T> {
