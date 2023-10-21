@@ -5,6 +5,6 @@ export interface PouchEntity extends Entity {
     entityType?: string;
 }
 
-export interface TormEntity extends Entity {
+export interface OrmEntity extends Entity {
 
 }

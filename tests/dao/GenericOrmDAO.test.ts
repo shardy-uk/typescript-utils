@@ -2,7 +2,7 @@ import {Column, DataSource, Entity} from "typeorm";
 import {GenericDAO} from "../../src/dao/GenericDAO";
 import {GenericOrmDAO} from "../../src/dao/GenericOrmDAO";
 import {TransactionManager} from "../../src/dao/Transaction";
-import {Counter, GenericOrmDoc} from "../../src/dao/types/DbTypes";
+import {GenericOrmDoc, OrmCounter} from "../../src/dao/types/DbTypes";
 
 @Entity()
 export class ExampleDoc extends GenericOrmDoc {
@@ -21,7 +21,7 @@ describe('GenericOrmDAO', () => {
         dataSource = new DataSource({
             type: 'sqlite',
             database: ':memory:',
-            entities: [GenericOrmDoc, Counter, ExampleDoc],
+            entities: [GenericOrmDoc, OrmCounter, ExampleDoc],
             synchronize: true
         });
         await dataSource.initialize();
@@ -40,10 +40,10 @@ describe('GenericOrmDAO', () => {
             doc.value = "Some Value";
 
             const [savedEntity] = await genericDAO.create(doc);
-            expect(savedEntity.id).toBeTruthy();
+            expect(savedEntity._id).toBeTruthy();
 
-            const retrievedDoc = await genericDAO.getOne(savedEntity.id!);
-            expect(retrievedDoc.id).toBe(savedEntity.id);
+            const retrievedDoc = await genericDAO.getOne(savedEntity._id!);
+            expect(retrievedDoc._id).toBe(savedEntity._id);
             expect(retrievedDoc.appVersion).toBe("0.0.1-alpha");
             expect(retrievedDoc.value).toBe(doc.value);
         });
@@ -57,7 +57,7 @@ describe('GenericOrmDAO', () => {
 
             const [updatedEntity] = await genericDAO.update(savedEntity);
 
-            const retrievedDoc = await genericDAO.getOne(updatedEntity.id!);
+            const retrievedDoc = await genericDAO.getOne(updatedEntity._id!);
             expect(retrievedDoc.value).toBe("Updated Value");
         });
 
@@ -70,7 +70,7 @@ describe('GenericOrmDAO', () => {
             let docs = await genericDAO.getAll();
             expect(docs.length).toEqual(1);
 
-            await genericDAO.delete(savedEntity.id!);
+            await genericDAO.delete(savedEntity._id!);
 
             docs = await genericDAO.getAll();
             expect(docs.length).toEqual(0);
@@ -88,7 +88,7 @@ describe('GenericOrmDAO', () => {
             const [savedEntity1] = await genericDAO.create(doc1);
             const [savedEntity2] = await genericDAO.create(doc2);
 
-            const retrievedDocs = await genericDAO.getMany([savedEntity1.id!, savedEntity2.id!]);
+            const retrievedDocs = await genericDAO.getMany([savedEntity1._id!, savedEntity2._id!]);
 
             expect(retrievedDocs.length).toBe(2);
 
@@ -191,9 +191,9 @@ describe('GenericOrmDAO with Transactions', () => {
 
         await transaction.rollback();
 
-        const revertedDoc = await genericDAO.getOne(createdDoc.id!);
+        const revertedDoc = await genericDAO.getOne(createdDoc._id!);
         expect(revertedDoc.value).toBe('Initial Value');
-        expect(revertedDoc.id).toBe(createdDoc.id);
+        expect(revertedDoc._id).toBe(createdDoc._id);
     });
 
     it('rolls back a document deletion', async () => {
@@ -210,7 +210,7 @@ describe('GenericOrmDAO with Transactions', () => {
         await saveTransaction.commit();
 
         const deleteTransaction = TransactionManager.createTransaction(genericDAO);
-        await genericDAO.delete(createdDoc.id!, deleteTransaction);
+        await genericDAO.delete(createdDoc._id!, deleteTransaction);
 
         allDocs = await genericDAO.getAll();
         expect(allDocs.length).toBe(0);
@@ -219,7 +219,7 @@ describe('GenericOrmDAO with Transactions', () => {
 
         allDocs = await genericDAO.getAll();
         expect(allDocs.length).toBe(1);
-        expect(allDocs[0].id).toBe(createdDoc.id);
+        expect(allDocs[0]._id).toBe(createdDoc._id);
     });
 
 
@@ -240,12 +240,12 @@ describe('GenericOrmDAO with Transactions', () => {
 
         const transaction = TransactionManager.createTransaction(genericDAO);
         const [savedDoc] = await genericDAO.update(createdDoc1, transaction);
-        await genericDAO.delete(createdDoc2.id!, transaction);
+        await genericDAO.delete(createdDoc2._id!, transaction);
         expect(savedDoc.value).toBe('Updated Value');
 
         await transaction.rollback();
 
-        const revertedDoc1 = await genericDAO.getOne(createdDoc1.id!);
+        const revertedDoc1 = await genericDAO.getOne(createdDoc1._id!);
         const allDocs = await genericDAO.getAll();
 
         expect(revertedDoc1.value).toBe('Initial Value');

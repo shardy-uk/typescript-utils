@@ -1,6 +1,12 @@
 import {BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn, VersionColumn} from "typeorm";
 
-export interface GenericPouchDoc {
+export interface GenericDoc {
+    _id?: string;
+    createdDate?: string;
+    updatedDate?: string;
+}
+
+export interface GenericPouchDoc extends GenericDoc {
     _id?: string;
     _rev?: string;
     entityType?: string;
@@ -11,14 +17,14 @@ export interface GenericPouchDoc {
     [key: string]: any;
 }
 
-export abstract class GenericOrmDoc extends BaseEntity {
+export abstract class GenericOrmDoc extends BaseEntity implements GenericDoc {
     @PrimaryGeneratedColumn("uuid")
-    id?: string;
+    _id?: string;
 
     @Column({type: "varchar"})
     appVersion?: string;
 
-    @CreateDateColumn({type: "varchar", nullable: true})
+    @CreateDateColumn({type: "varchar", nullable: false})
     createdDate?: string;
 
     @UpdateDateColumn({type: "varchar", nullable: true})
@@ -26,20 +32,20 @@ export abstract class GenericOrmDoc extends BaseEntity {
 }
 
 @Entity('Counters')  // Defines the table name
-export class Counter extends BaseEntity {
+export class OrmCounter extends BaseEntity implements GenericDoc {
     @PrimaryGeneratedColumn('uuid')
-    id?: string;  // The unique ID of the counter
+    _id?: string;  // The unique ID of the counter
     @Column('varchar')
     name: string;
     @Column('int')
     seq: number;  // The current sequence number
     @VersionColumn()
-    version: number;
+    _rev: number;
 
     constructor(name: string, seq: number) {
         super();
         this.name = name;
         this.seq = seq;
-        this.version = 1;
+        this._rev = 1;
     }
 }

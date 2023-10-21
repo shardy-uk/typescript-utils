@@ -4,7 +4,7 @@ import {DateUtils} from "../utils/DateUtils";
 import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, TypeORMTransactionWrapper} from "./Transaction";
-import {Counter, GenericOrmDoc} from "./types/DbTypes";
+import {GenericOrmDoc, OrmCounter} from "./types/DbTypes";
 
 export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
     private repository: Repository<D>;
@@ -37,7 +37,7 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
     async getOne(id: string): Promise<D> {
         const result = await this.repository
             .createQueryBuilder("entity")
-            .where("entity.id = :id", {id})
+            .where("entity._id = :id", {id})
             .getOne();
 
         if (!result) {
@@ -83,7 +83,7 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
             try {
                 try {
                     counterDoc = await this.repository.manager
-                        .createQueryBuilder(Counter, "counter")
+                        .createQueryBuilder(OrmCounter, "counter")
                         .where("counter.name = :name", {name: counterDocId})
                         .getOne();
                 } catch (error: any) {
@@ -91,13 +91,13 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
                 }
 
                 if (!counterDoc) {
-                    counterDoc = new Counter(counterDocId, 0);
+                    counterDoc = new OrmCounter(counterDocId, 0);
                 }
 
                 counterDoc.seq++;
 
                 try {
-                    counterDoc = await this.repository.manager.save(Counter, counterDoc);
+                    counterDoc = await this.repository.manager.save(OrmCounter, counterDoc);
                     return counterDoc.seq;
                 } catch (error: any) {
                     if (error instanceof OptimisticLockVersionMismatchError) {
