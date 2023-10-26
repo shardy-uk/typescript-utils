@@ -20,6 +20,12 @@ export class VerificationError extends ChainedError {
     }
 }
 
+export class MappingError extends ChainedError {
+    constructor(message: string, parentError?: Error) {
+        super(message, parentError, "MappingError");
+    }
+}
+
 export class HashingError extends ChainedError {
     constructor(message: string, parentError?: Error) {
         super(message, parentError, "HashingError");
@@ -100,7 +106,8 @@ export enum ErrorType {
     UserExists = 'UserExists',
     InvalidUserId = 'InvalidUserId',
     RollbackError = 'RollbackError',
-    DatabaseError = 'DatabaseError'
+    DatabaseError = 'DatabaseError',
+    MappingError = 'MappingError'
 }
 
 // Error Class Map
@@ -117,7 +124,8 @@ const ErrorClassMap: Record<ErrorType, typeof ChainedError> = {
     [ErrorType.UserExists]: UserExists,
     [ErrorType.InvalidUserId]: InvalidUserId,
     [ErrorType.RollbackError]: RollbackError,
-    [ErrorType.DatabaseError]: DatabaseError
+    [ErrorType.DatabaseError]: DatabaseError,
+    [ErrorType.MappingError]: MappingError
 };
 
 // Error Factory Function

@@ -1,6 +1,7 @@
+import {PouchEntity} from "../../../dist/model/PouchEntity";
 import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
 import {GenericPouchDoc} from "../../../src/dao/types/DbTypes";
-import {PouchEntity} from "../../../src/dao/types/DomainTypes";
+import {DateUtils} from "../../../src/utils/DateUtils";
 
 describe('GenericPouchMapper', () => {
     describe('toDomain', () => {
@@ -10,6 +11,7 @@ describe('GenericPouchMapper', () => {
                 _rev: 'some-rev',
                 entityType: 'some-type',
                 appVersion: '0.0.1-alpha',
+                createdDate: DateUtils.nowISO()
             };
 
             const domainModel = GenericPouchMapper.toDomain(pouchDoc);
@@ -17,7 +19,8 @@ describe('GenericPouchMapper', () => {
             expect(domainModel).toEqual({
                 id: 'some-id',
                 revision: 'some-rev',
-                entityType: 'some-type'
+                entityType: 'some-type',
+                createdDate: new Date(pouchDoc.createdDate!)
             });
         });
     });
