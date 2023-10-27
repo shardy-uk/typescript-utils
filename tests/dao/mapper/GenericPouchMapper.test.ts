@@ -1,7 +1,7 @@
 import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
 import {GenericPouchDoc} from "../../../src/dao/types/DbTypes";
-import {DateUtils} from "../../../src/utils/DateUtils";
 import {PouchEntity} from "../../../src/dao/types/DomainTypes";
+import TestUtils from "../../utils/TestUtils";
 
 describe('GenericPouchMapper', () => {
     describe('toDomain', () => {
@@ -11,7 +11,7 @@ describe('GenericPouchMapper', () => {
                 _rev: 'some-rev',
                 entityType: 'some-type',
                 appVersion: '0.0.1-alpha',
-                createdDate: DateUtils.nowISO()
+                createdDate: TestUtils.getRandomDate().toISOString()
             };
 
             const domainModel = GenericPouchMapper.toDomain(pouchDoc);

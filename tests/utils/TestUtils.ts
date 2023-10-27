@@ -72,4 +72,26 @@ export default class TestUtils {
         return words.map(word => word[0]).join('');
     }
 
+    public static getRandomDate(startDate?: Date, endDate?: Date): Date {
+        if (!startDate && !endDate) {
+            // If no startDate and endDate provided, generate a random date within a reasonable range (e.g., 100 years)
+            const currentDate = new Date();
+            startDate = new Date(currentDate.getFullYear() - 100, 0, 1);
+            endDate = new Date(currentDate.getFullYear() + 1, 11, 31);
+        }
+
+        if (startDate && endDate) {
+            const startTimestamp = startDate.getTime();
+            const endTimestamp = endDate.getTime();
+
+            // Generate a random timestamp between startTimestamp and endTimestamp
+            const randomTimestamp = Math.random() * (endTimestamp - startTimestamp) + startTimestamp;
+
+            // Create a new Date object from the random timestamp
+            return new Date(randomTimestamp);
+        } else {
+            throw new Error('Both startDate and endDate must be provided or omitted together.');
+        }
+    }
+
 }
