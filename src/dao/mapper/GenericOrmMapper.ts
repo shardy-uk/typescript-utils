@@ -1,8 +1,12 @@
 import {createError, ErrorType} from "../../errors/Errors";
 import {GenericOrmDoc} from "../types/DbTypes";
 import {OrmEntity} from "../types/DomainTypes";
+import {GenericMapper} from "./GenericMapper";
 
-export class GenericPouchMapper {
+export class GenericOrmMapper implements GenericMapper {
+    constructor() {
+    }
+
     /**
      * Converts an ORM document to a domain model one.
      *
@@ -11,7 +15,7 @@ export class GenericPouchMapper {
      * @param {GenericOrmDoc} dbDoc - The TypeORM document to convert.
      * @returns {PouchEntity} The converted domain model.
      */
-    static toDomain(dbDoc: GenericOrmDoc): OrmEntity {
+    public toDomain(dbDoc: GenericOrmDoc): OrmEntity {
         const {_id, createdDate, updatedDate} = dbDoc;
         if (!_id || !createdDate) {
             throw createError(ErrorType.MappingError, `Unable to map object with properties ID: ${_id} createdDate: ${createdDate}`);
@@ -32,7 +36,7 @@ export class GenericPouchMapper {
      * @param {PouchEntity} domainDoc - The domain model to convert.
      * @returns {GenericOrmDoc} The converted ORM document.
      */
-    static toDB(domainDoc: OrmEntity): GenericOrmDoc {
+    public toDB(domainDoc: OrmEntity): GenericOrmDoc {
         const {id, createdDate, updatedDate} = domainDoc;
 
         // Initialize the object with the _id field

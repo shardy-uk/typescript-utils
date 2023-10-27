@@ -1,8 +1,8 @@
-import {GenericPouchMapper} from "../../../src/dao/mapper/GenericOrmMapper";
+import {GenericOrmMapper} from "../../../src/dao/mapper/GenericOrmMapper";
 import {GenericOrmDoc} from "../../../src/dao/types/DbTypes";
 import TestUtils from "../../utils/TestUtils";
 
-describe('GenericPouchMapper', () => {
+describe('GenericOrmMapper', () => {
     describe('toDomain', () => {
         it('should convert a valid ORM document to a domain model', () => {
             const ormDoc = {
@@ -11,7 +11,7 @@ describe('GenericPouchMapper', () => {
                 updatedDate: TestUtils.getRandomDate().toISOString(),
             } as GenericOrmDoc;
 
-            const domainModel = GenericPouchMapper.toDomain(ormDoc);
+            const domainModel = (new GenericOrmMapper()).toDomain(ormDoc);
 
             expect(domainModel).toEqual({
                 id: 'some-id',
@@ -28,7 +28,7 @@ describe('GenericPouchMapper', () => {
             } as GenericOrmDoc;
 
             // Expect an error to be thrown
-            expect(() => GenericPouchMapper.toDomain(ormDoc)).toThrowError(
+            expect(() => (new GenericOrmMapper()).toDomain(ormDoc)).toThrowError(
                 'Unable to map object with properties ID'
             );
         });
@@ -41,7 +41,7 @@ describe('GenericPouchMapper', () => {
             } as GenericOrmDoc;
 
             // Expect an error to be thrown
-            expect(() => GenericPouchMapper.toDomain(ormDoc)).toThrowError(
+            expect(() => (new GenericOrmMapper()).toDomain(ormDoc)).toThrowError(
                 'Unable to map object with properties ID'
             );
         });
@@ -55,7 +55,7 @@ describe('GenericPouchMapper', () => {
                 updatedDate: new Date(),
             };
 
-            const ormDoc = GenericPouchMapper.toDB(domainModel);
+            const ormDoc = (new GenericOrmMapper()).toDB(domainModel);
 
             expect(ormDoc).toEqual({
                 _id: 'some-id',
@@ -72,7 +72,7 @@ describe('GenericPouchMapper', () => {
                 // No updatedDate property
             };
 
-            const ormDoc = GenericPouchMapper.toDB(domainModel);
+            const ormDoc = (new GenericOrmMapper()).toDB(domainModel);
 
             expect(ormDoc).toEqual({
                 _id: 'some-id',

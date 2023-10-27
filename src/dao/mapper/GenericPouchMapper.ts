@@ -1,8 +1,11 @@
 import {GenericPouchDoc} from "../types/DbTypes";
 import {PouchEntity} from "../types/DomainTypes";
+import {GenericMapper} from "./GenericMapper";
 
+export class GenericPouchMapper implements GenericMapper {
+    constructor() {
+    }
 
-export class GenericPouchMapper {
     /**
      * Converts a PouchDB document to a domain model.
      *
@@ -11,7 +14,7 @@ export class GenericPouchMapper {
      * @param {GenericPouchDoc} dbDoc - The PouchDB document to convert.
      * @returns {PouchEntity} The converted domain model.
      */
-    static toDomain(dbDoc: GenericPouchDoc): PouchEntity {
+    public toDomain(dbDoc: GenericPouchDoc): PouchEntity {
         const {_id, _rev, entityType, createdDate, updatedDate} = dbDoc;
         if (!_id || !_rev || !entityType || !createdDate) {
             throw new Error(`Unable to map object with properties ID: ${_id}, revision: ${_rev}, entityType: ${entityType}, createdDate: ${createdDate}`);
@@ -37,7 +40,7 @@ export class GenericPouchMapper {
      * @param {PouchEntity} domainDoc - The domain model to convert.
      * @returns {GenericPouchDoc} The converted PouchDB document.
      */
-    static toDB(domainDoc: PouchEntity): GenericPouchDoc {
+    public toDB(domainDoc: PouchEntity): GenericPouchDoc {
         const {id, revision, entityType, createdDate, updatedDate} = domainDoc;
 
         // Initialize the object with the _id and _rev fields

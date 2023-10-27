@@ -14,7 +14,7 @@ describe('GenericPouchMapper', () => {
                 createdDate: TestUtils.getRandomDate().toISOString()
             };
 
-            const domainModel = GenericPouchMapper.toDomain(pouchDoc);
+            const domainModel = (new GenericPouchMapper()).toDomain(pouchDoc);
 
             expect(domainModel).toEqual({
                 id: 'some-id',
@@ -33,7 +33,7 @@ describe('GenericPouchMapper', () => {
                 entityType: 'some-type'
             };
 
-            const pouchDoc = GenericPouchMapper.toDB(domainModel);
+            const pouchDoc = (new GenericPouchMapper()).toDB(domainModel);
 
             expect(pouchDoc).toEqual({
                 _id: 'some-id',
