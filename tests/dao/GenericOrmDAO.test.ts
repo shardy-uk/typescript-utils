@@ -3,6 +3,7 @@ import {GenericDAO} from "../../src/dao/GenericDAO";
 import {GenericOrmDAO} from "../../src/dao/GenericOrmDAO";
 import {TransactionManager} from "../../src/dao/Transaction";
 import {GenericOrmDoc, OrmCounter} from "../../src/dao/types/DbTypes";
+import {GenericOrmMapper} from "../../src/dao/mapper/GenericOrmMapper";
 
 @Entity()
 export class ExampleDoc extends GenericOrmDoc {
@@ -26,7 +27,7 @@ describe('GenericOrmDAO', () => {
         });
         await dataSource.initialize();
 
-        genericDAO = new GenericOrmDAO(ExampleDoc, dataSource.manager, "0.0.1-alpha");
+        genericDAO = new GenericOrmDAO(ExampleDoc, new GenericOrmMapper(), dataSource.manager, "0.0.1-alpha");
     });
 
     afterEach(async () => {
@@ -152,7 +153,7 @@ describe('GenericOrmDAO with Transactions', () => {
         });
         await dataSource.initialize();
 
-        genericDAO = new GenericOrmDAO(ExampleDoc, dataSource.manager, "0.0.1-alpha");
+        genericDAO = new GenericOrmDAO(ExampleDoc, new GenericOrmMapper(), dataSource.manager, "0.0.1-alpha");
     });
 
     afterEach(async () => {

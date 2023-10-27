@@ -5,6 +5,7 @@ import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, TypeORMTransactionWrapper} from "./Transaction";
 import {GenericOrmDoc, OrmCounter} from "./types/DbTypes";
+import {GenericMapper} from "./mapper/GenericMapper";
 
 export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
     private repository: Repository<D>;
@@ -12,6 +13,7 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
 
     constructor(
         private readonly entity: new () => D,
+        private readonly mapper: GenericMapper,
         private readonly entityManager: EntityManager,
         private readonly appVersion: string
     ) {
@@ -134,6 +136,10 @@ export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
             return transaction.queryRunner.manager;  // This is within the transaction
         }
         return this.entityManager;  // This is outside of the transaction
+    }
+
+    getMapper(): GenericMapper {
+        return this.mapper;
     }
 }
 

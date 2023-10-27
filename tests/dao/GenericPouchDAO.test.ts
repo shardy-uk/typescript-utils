@@ -6,6 +6,7 @@ import {GenericDAO} from '../../src/dao/GenericDAO';
 import {GenericPouchDAO} from '../../src/dao/GenericPouchDAO';
 import {TransactionManager} from '../../src/dao/Transaction';
 import {TestDoc} from "./TestDoc";
+import {GenericPouchMapper} from "../../src/dao/mapper/GenericPouchMapper";
 
 PouchDB.plugin(memoryAdapter);
 
@@ -15,7 +16,7 @@ describe('GenericPouchDAO', () => {
 
     beforeEach(() => {
         db = new PouchDB('testDB' + uuidv4(), {adapter: 'memory'});
-        genericDAO = new GenericPouchDAO(db, "Test|", packageJson.version);
+        genericDAO = new GenericPouchDAO(db, new GenericPouchMapper(), "Test|", packageJson.version);
     });
 
     afterEach(async () => {
@@ -192,7 +193,7 @@ describe('GenericPouchDAO with Transactions', () => {
 
     beforeEach(() => {
         db = new PouchDB('testDB' + uuidv4(), {adapter: 'memory'});
-        genericDAO = new GenericPouchDAO(db, "Test|", packageJson.version);
+        genericDAO = new GenericPouchDAO(db, new GenericPouchMapper(), "Test|", packageJson.version);
     });
 
     afterEach(async () => {

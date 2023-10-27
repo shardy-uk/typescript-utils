@@ -8,6 +8,7 @@ import {StringUtils} from "../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, UndoFunction} from "./Transaction";
 import {GenericPouchDoc} from "./types/DbTypes";
+import {GenericMapper} from "./mapper/GenericMapper";
 import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);
@@ -15,9 +16,14 @@ PouchDB.plugin(PouchDBFind);
 export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>, IDocTypeProvider {
     constructor(
         private readonly db: Database = new PouchDB(process.env.DB_NAME!),
+        private readonly mapper: GenericMapper,
         private readonly entityType: string,
         private readonly appVersion: string
     ) {
+    }
+
+    getMapper(): GenericMapper {
+        return this.mapper;
     }
 
     getEntityType(): string {

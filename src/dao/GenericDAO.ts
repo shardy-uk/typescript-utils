@@ -1,4 +1,5 @@
 import {Transaction} from "./Transaction";
+import {GenericMapper} from "./mapper/GenericMapper";
 
 /**
  * GenericDAO interface for database operations.
@@ -71,4 +72,11 @@ export interface GenericDAO<D> {
      * @returns {Promise<D[]>} A promise that resolves with an array of documents that match the criteria.
      */
     findByField(fieldName: string, value: any): Promise<D[]>;
+
+    /**
+     * Get the appropriate mapper for this DAO
+     *
+     * @returns {GenericMapper} The correct implementation of the TypeMapper for this DAO
+     */
+    getMapper(): GenericMapper;
 }
