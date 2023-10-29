@@ -7,6 +7,7 @@ describe('GenericOrmMapper', () => {
         it('should convert a valid ORM document to a domain model', () => {
             const ormDoc = {
                 _id: 'some-id',
+                appVersion: "a-version",
                 createdDate: TestUtils.getRandomDate().toISOString(),
                 updatedDate: TestUtils.getRandomDate().toISOString(),
             } as GenericOrmDoc;
