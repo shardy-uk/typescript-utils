@@ -8,27 +8,24 @@ export class GenericOrmMapper implements GenericMapper {
     }
 
     /**
-     * Converts an ORM document to a domain model.
+     * Converts an ORM document to a domain model one.
      *
-     * Note: This default implementation maps all fields across to the domain where the attribute names match, but converts _id to id. Note: createdDate is a required field
+     * Note: This default implementation maps only the base default fields of id, createdDate and updatedDate across to the domain, converts _id to id. Note: createdDate is a required field
      *
      * @param {GenericOrmDoc} dbDoc - The DB document to convert.
      * @returns {OrmEntity} The converted domain model.
-     * @warning No type conversion occurs on fields other than createdDate or updatedDate, so implementers will need to explicitly override where type conversions between Domain and DB are performed
      */
     public toDomain(dbDoc: GenericOrmDoc): OrmEntity {
         const {
             _id,
-            appVersion,
             createdDate,
-            updatedDate,
-            ...otherFields
+            updatedDate
         } = dbDoc;
 
         if (!_id || !createdDate) {
             throw createError(ErrorType.MappingError, `Unable to map object with properties ID: ${_id} createdDate: ${createdDate}`);
         }
-        const domainDoc: OrmEntity = {id: _id, createdDate: new Date(createdDate), ...otherFields}
+        const domainDoc: OrmEntity = {id: _id, createdDate: new Date(createdDate)}
 
         if (updatedDate !== undefined) {
             domainDoc.updatedDate = new Date(updatedDate);
@@ -39,17 +36,16 @@ export class GenericOrmMapper implements GenericMapper {
     /**
      * Converts a domain model to an ORM DB document.
      *
-     * Note: This default implementation maps all fields across to the DB where the attribute names match, but converts _id to id from the domain model to the database document.
+     * Note: This default implementation maps only the base default fields of id, createdDate and updatedDate across to the DB, converts _id to id from the domain model to the database document.
      *
      * @param {OrmEntity} domainDoc - The domain model to convert.
      * @returns {GenericOrmDoc} The converted DB document.
-     * @warning No type conversion occurs on fields other than createdDate or updatedDate, so implementers will need to explicitly override where type conversions between Domain and DB are performed
      */
     public toDB(domainDoc: OrmEntity): GenericOrmDoc {
-        const {id, createdDate, updatedDate, ...otherFields} = domainDoc;
+        const {id, createdDate, updatedDate} = domainDoc;
 
         // Initialize the object with the _id field
-        const dbDoc: Partial<GenericOrmDoc> = {_id: id, ...otherFields};
+        const dbDoc: Partial<GenericOrmDoc> = {_id: id};
 
         // Conditionally include createdDate if it's not undefined
         if (createdDate !== undefined) {
