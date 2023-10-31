@@ -13,7 +13,7 @@ import Database = PouchDB.Database;
 
 PouchDB.plugin(PouchDBFind);
 
-export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D>, IDocTypeProvider {
+export class GenericPouchDAO<D extends GenericPouchDoc> implements GenericDAO<D> {
     constructor(
         private readonly db: Database = new PouchDB(process.env.DB_NAME!),
         private readonly mapper: GenericMapper,
@@ -385,8 +385,4 @@ interface AllDocsResponse<T> {
     total_rows: number;
     offset: number;
     rows: Array<{ id: string; key: string; value: { rev: string }; doc?: T }>;
-}
-
-export interface IDocTypeProvider {
-    getEntityType(): string;
 }
