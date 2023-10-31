@@ -1,6 +1,6 @@
 import {GenericOrmMapper} from "../../../src/dao/mapper/GenericOrmMapper";
 import {GenericOrmDoc} from "../../../src/dao/types/DbTypes";
-import TestUtils from "../../utils/TestUtils";
+import TestUtils from "../../../src/utils/TestUtils";
 
 describe('GenericOrmMapper', () => {
     describe('toDomain', () => {
