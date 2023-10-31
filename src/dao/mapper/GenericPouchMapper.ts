@@ -74,3 +74,40 @@ export class GenericPouchMapper implements GenericMapper {
     }
 
 }
+
+export class GenericPouchExpandingMapper extends GenericPouchMapper {
+    /**
+     * Converts a PouchDB document to a domain model.
+     *
+     * Note: This default implementation maps all fields provided from the database document to the domain model, mapping id & revision to _id & _rev.
+     *
+     * @param {GenericPouchDoc} dbDoc - The PouchDB document to convert.
+     * @returns {PouchEntity} The converted domain model.
+     */
+    public toDomain(dbDoc: GenericPouchDoc): PouchEntity {
+        const superDoc = super.toDomain(dbDoc);
+        const otherFields = this.getUnmappedFields(dbDoc, superDoc);
+        return {...superDoc, ...otherFields};
+    }
+
+    /**
+     * Converts a domain model to a PouchDB document.
+     *
+     * Note: This default implementation maps all fields provided from the domain model to the database document, mapping id & revision to _id & _rev.
+     *
+     * @param {PouchEntity} domainDoc - The domain model to convert.
+     * @returns {GenericPouchDoc} The converted PouchDB document.
+     */
+    public toDB(domainDoc: PouchEntity): GenericPouchDoc {
+        const superDoc = super.toDB(domainDoc);
+        const otherFields = this.getUnmappedFields(domainDoc, superDoc);
+        return {...superDoc, ...otherFields};
+    }
+
+    private getUnmappedFields(original: Record<string, any>, mapped: Record<string, any>): Record<string, any> {
+        const mappedKeys = new Set(Object.keys(mapped));
+        return Object.fromEntries(
+            Object.entries(original).filter(([key]) => !mappedKeys.has(key))
+        );
+    }
+}
