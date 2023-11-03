@@ -1,7 +1,7 @@
 import {GenericPouchDoc} from "../types/DbTypes";
 import {PouchEntity} from "../types/DomainTypes";
 import {GenericMapper} from "./GenericMapper";
-import {createError, ErrorType} from "../../errors/Errors";
+import {createError, ErrorType} from "../../../errors/Errors";
 
 export class GenericPouchMapper implements GenericMapper {
     constructor() {

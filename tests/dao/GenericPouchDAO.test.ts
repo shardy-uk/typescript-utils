@@ -2,11 +2,11 @@ import PouchDB from 'pouchdb';
 import memoryAdapter from 'pouchdb-adapter-memory';
 import {v4 as uuidv4} from 'uuid';
 import packageJson from '../../package.json';
-import {GenericDAO} from '../../src/dao/GenericDAO';
-import {GenericPouchDAO} from '../../src/dao/GenericPouchDAO';
-import {TransactionManager} from '../../src/dao/Transaction';
+import {GenericDAO} from '../../src/services/dao/GenericDAO';
+import {GenericPouchDAO} from '../../src/services/dao/GenericPouchDAO';
+import {TransactionManager} from '../../src/services/dao/Transaction';
 import {TestDoc} from "./TestDoc";
-import {GenericPouchMapper} from "../../src/dao/mapper/GenericPouchMapper";
+import {GenericPouchMapper} from "../../src/services/dao/mapper/GenericPouchMapper";
 
 PouchDB.plugin(memoryAdapter);
 

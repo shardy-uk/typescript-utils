@@ -1,5 +1,5 @@
-import {GenericOrmMapper} from "../../../src/dao/mapper/GenericOrmMapper";
-import {GenericOrmDoc} from "../../../src/dao/types/DbTypes";
+import {GenericOrmMapper} from "../../../src/services/dao/mapper/GenericOrmMapper";
+import {GenericOrmDoc} from "../../../src/services/dao/types/DbTypes";
 import TestUtils from "../../../src/utils/TestUtils";
 
 describe('GenericOrmMapper', () => {

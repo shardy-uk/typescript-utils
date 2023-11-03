@@ -1,5 +1,5 @@
 import {QueryRunner} from "typeorm";
-import {createError, ErrorType} from "../errors/Errors";
+import {createError, ErrorType} from "../../errors/Errors";
 import {GenericDAO} from "./GenericDAO";
 import {GenericOrmDAO} from "./GenericOrmDAO";
 import {GenericPouchDAO} from "./GenericPouchDAO";

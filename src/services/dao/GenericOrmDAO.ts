@@ -1,7 +1,7 @@
 import {EntityManager, OptimisticLockVersionMismatchError, QueryRunner, Repository} from "typeorm";
-import {createError, ErrorType} from "../errors/Errors";
-import {DateUtils} from "../utils/DateUtils";
-import {StringUtils} from "../utils/StringUtils";
+import {createError, ErrorType} from "../../errors/Errors";
+import {DateUtils} from "../../utils/DateUtils";
+import {StringUtils} from "../../utils/StringUtils";
 import {GenericDAO} from "./GenericDAO";
 import {Transaction, TypeORMTransactionWrapper} from "./Transaction";
 import {GenericOrmDoc, OrmCounter} from "./types/DbTypes";

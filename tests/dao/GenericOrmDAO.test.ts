@@ -1,9 +1,9 @@
 import {Column, DataSource, Entity} from "typeorm";
-import {GenericDAO} from "../../src/dao/GenericDAO";
-import {GenericOrmDAO} from "../../src/dao/GenericOrmDAO";
-import {TransactionManager} from "../../src/dao/Transaction";
-import {GenericOrmDoc, OrmCounter} from "../../src/dao/types/DbTypes";
-import {GenericOrmMapper} from "../../src/dao/mapper/GenericOrmMapper";
+import {GenericDAO} from "../../src/services/dao/GenericDAO";
+import {GenericOrmDAO} from "../../src/services/dao/GenericOrmDAO";
+import {TransactionManager} from "../../src/services/dao/Transaction";
+import {GenericOrmDoc, OrmCounter} from "../../src/services/dao/types/DbTypes";
+import {GenericOrmMapper} from "../../src/services/dao/mapper/GenericOrmMapper";
 
 @Entity()
 export class ExampleDoc extends GenericOrmDoc {

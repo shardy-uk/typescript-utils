@@ -1,4 +1,4 @@
-import {GenericPouchDoc} from "../../src/dao/types/DbTypes";
+import {GenericPouchDoc} from "../../src/services/dao/types/DbTypes";
 
 export interface TestDoc extends GenericPouchDoc {
     name: string;

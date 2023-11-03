@@ -1,5 +1,5 @@
 import {GenericDoc} from "../types/DbTypes";
-import {Entity} from "../../model/Entity";
+import {Entity} from "../../../model/Entity";
 
 export interface GenericMapper {
     /**

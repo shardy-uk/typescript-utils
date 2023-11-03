@@ -1,6 +1,6 @@
-import {GenericPouchMapper} from "../../../src/dao/mapper/GenericPouchMapper";
-import {GenericPouchDoc} from "../../../src/dao/types/DbTypes";
-import {PouchEntity} from "../../../src/dao/types/DomainTypes";
+import {GenericPouchMapper} from "../../../src/services/dao/mapper/GenericPouchMapper";
+import {GenericPouchDoc} from "../../../src/services/dao/types/DbTypes";
+import {PouchEntity} from "../../../src/services/dao/types/DomainTypes";
 import TestUtils from "../../../src/utils/TestUtils";
 
 describe('GenericPouchMapper', () => {

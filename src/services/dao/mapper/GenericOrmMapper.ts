@@ -1,4 +1,4 @@
-import {createError, ErrorType} from "../../errors/Errors";
+import {createError, ErrorType} from "../../../errors/Errors";
 import {GenericOrmDoc} from "../types/DbTypes";
 import {OrmEntity} from "../types/DomainTypes";
 import {GenericMapper} from "./GenericMapper";
