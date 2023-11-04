@@ -12,16 +12,12 @@ export interface GenericDoc {
     _id?: string;
     createdDate?: string;
     updatedDate?: string;
+    appVersion?: string;
 }
 
 export interface GenericPouchDoc extends GenericDoc {
-    _id?: string;
     _rev?: string;
     entityType?: string;
-    appVersion?: string;
-    createdDate?: string;
-    updatedDate?: string;
-
     [key: string]: any;
 }
 
@@ -42,7 +38,7 @@ export abstract class GenericOrmDoc extends BaseEntity implements GenericDoc {
 @Entity('Counters')  // Defines the table name
 export class OrmCounter extends BaseEntity implements GenericDoc {
     @PrimaryGeneratedColumn('uuid')
-    _id?: string;  // The unique ID of the counter
+    _id?: string;
     @Column('varchar')
     name: string;
     @Column('int')
@@ -54,6 +50,6 @@ export class OrmCounter extends BaseEntity implements GenericDoc {
         super();
         this.name = name;
         this.seq = seq;
-        this._rev = 1;
+        this._rev = 0;
     }
 }
