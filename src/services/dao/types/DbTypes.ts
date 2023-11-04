@@ -10,13 +10,13 @@ import {
 
 export interface GenericDoc {
     _id?: string;
+    _rev?: string;
     createdDate?: string;
     updatedDate?: string;
     appVersion?: string;
 }
 
 export interface GenericPouchDoc extends GenericDoc {
-    _rev?: string;
     entityType?: string;
     [key: string]: any;
 }
@@ -24,6 +24,9 @@ export interface GenericPouchDoc extends GenericDoc {
 export abstract class GenericOrmDoc extends BaseEntity implements GenericDoc {
     @PrimaryGeneratedColumn("uuid")
     _id?: string;
+
+    @VersionColumn()
+    _rev?: string;
 
     @Column({type: "varchar"})
     appVersion?: string;
@@ -43,13 +46,10 @@ export class OrmCounter extends BaseEntity implements GenericDoc {
     name: string;
     @Column('int')
     seq: number;  // The current sequence number
-    @VersionColumn()
-    _rev: number;
 
     constructor(name: string, seq: number) {
         super();
         this.name = name;
         this.seq = seq;
-        this._rev = 0;
     }
 }
