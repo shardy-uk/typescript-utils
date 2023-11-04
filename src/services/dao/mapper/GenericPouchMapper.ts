@@ -1,5 +1,5 @@
 import {GenericPouchDoc} from "../types/DbTypes";
-import {PouchEntity} from "../types/DomainTypes";
+import {PouchEntity} from "../../../model/DomainTypes";
 import {GenericMapper} from "./GenericMapper";
 import {createError, ErrorType} from "../../../errors/Errors";
 

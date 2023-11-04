@@ -1,6 +1,6 @@
 import {createError, ErrorType} from "../../../errors/Errors";
 import {GenericOrmDoc} from "../types/DbTypes";
-import {OrmEntity} from "../types/DomainTypes";
+import {OrmEntity} from "../../../model/DomainTypes";
 import {GenericMapper} from "./GenericMapper";
 
 export class GenericOrmMapper implements GenericMapper {

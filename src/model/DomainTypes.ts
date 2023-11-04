@@ -1,4 +1,4 @@
-import {Entity} from "../../../model/Entity";
+import {Entity} from "./Entity";
 
 export interface PouchEntity extends Entity {
     entityType?: string;
