@@ -8,7 +8,7 @@ import {GenericOrmDoc, OrmCounter} from "./types/DbTypes";
 import {GenericMapper} from "./mapper/GenericMapper";
 
 export class GenericOrmDAO<D extends GenericOrmDoc> implements GenericDAO<D> {
-    private repository: Repository<D>;
+    protected readonly repository: Repository<D>;
     private mutex: Mutex = new Mutex();
 
     constructor(
