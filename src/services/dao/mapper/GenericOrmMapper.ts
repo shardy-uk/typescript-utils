@@ -18,6 +18,7 @@ export class GenericOrmMapper implements GenericMapper {
     public toDomain(dbDoc: GenericOrmDoc): OrmEntity {
         const {
             _id,
+            _rev,
             createdDate,
             updatedDate
         } = dbDoc;
@@ -25,7 +26,7 @@ export class GenericOrmMapper implements GenericMapper {
         if (!_id || !createdDate) {
             throw createError(ErrorType.MappingError, `Unable to map object with properties ID: ${_id} createdDate: ${createdDate}`);
         }
-        const domainDoc: OrmEntity = {id: _id, createdDate: new Date(createdDate)}
+        const domainDoc: OrmEntity = {id: _id, revision: _rev, createdDate: new Date(createdDate)}
 
         if (updatedDate !== undefined) {
             domainDoc.updatedDate = new Date(updatedDate);
@@ -42,10 +43,10 @@ export class GenericOrmMapper implements GenericMapper {
      * @returns {GenericOrmDoc} The converted DB document.
      */
     public toDB(domainDoc: OrmEntity): GenericOrmDoc {
-        const {id, createdDate, updatedDate} = domainDoc;
+        const {id, revision, createdDate, updatedDate} = domainDoc;
 
         // Initialize the object with the _id field
-        const dbDoc: Partial<GenericOrmDoc> = {_id: id};
+        const dbDoc: Partial<GenericOrmDoc> = {_id: id, _rev: revision};
 
         // Conditionally include createdDate if it's not undefined
         if (createdDate !== undefined) {
